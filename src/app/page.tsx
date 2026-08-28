@@ -4,7 +4,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '@/context/AuthContext';
 import Sidebar from '@/components/chat/Sidebar';
 import ChatWindow from '@/components/chat/ChatWindow';
-import FacebookPortal from '@/components/social/FacebookPortal';
+import DashboardPortal from '@/components/social/DashboardPortal';
 import { Conversation, User, Message } from '@/types';
 import api from '@/lib/api';
 import { getSocket } from '@/lib/socket';
@@ -226,7 +226,7 @@ export default function Home() {
             onCloseChat={() => setSelectedConversation(null)}
           />
         ) : (
-          <FacebookPortal
+          <DashboardPortal
             currentUser={user}
             onRefreshConversations={fetchConversations}
             onSelectConversation={setSelectedConversation}

@@ -248,7 +248,7 @@ export default function Sidebar({
             <div className="relative">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
               <Input 
-                placeholder="Search Messenger..." 
+                placeholder="Search messages..." 
                 className="pl-9 bg-muted/40 border-transparent focus-visible:ring-primary/50 text-sm h-9"
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
@@ -256,7 +256,7 @@ export default function Sidebar({
             </div>
           </div>
 
-          {/* Messenger Style Filter Pills */}
+          {/* Filter Pills */}
           <div className="flex space-x-1.5 px-4 pb-3 pt-1 overflow-x-auto no-scrollbar">
             {[
               { id: 'all', label: 'All' },
@@ -412,7 +412,7 @@ export default function Sidebar({
                 </div>
               )}
 
-              {/* Incoming Requests (Styled in Facebook Connection Request Card Grid Layout) */}
+              {/* Incoming Requests (Connection Request Card Grid Layout) */}
               {pendingIncoming.length > 0 && (
                 <div className="space-y-2.5">
                   <div className="flex items-center justify-between px-1">

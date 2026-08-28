@@ -12,13 +12,13 @@ import {
   Gift, Users, UserCheck, UserPlus, Play, Globe 
 } from 'lucide-react';
 
-interface FacebookPortalProps {
+interface DashboardPortalProps {
   currentUser: User | null;
   onRefreshConversations: () => void;
   onSelectConversation: (conversation: Conversation) => void;
 }
 
-export default function FacebookPortal({ currentUser, onRefreshConversations, onSelectConversation }: FacebookPortalProps) {
+export default function DashboardPortal({ currentUser, onRefreshConversations, onSelectConversation }: DashboardPortalProps) {
   const [activeSubTab, setActiveSubTab] = useState<'feed' | 'requests' | 'friends'>('feed');
   const [friends, setFriends] = useState<any[]>([]);
   const [pendingIncoming, setPendingIncoming] = useState<any[]>([]);
