@@ -50,7 +50,8 @@ export default function ChatWindow({
       setLoading(true);
       try {
         const response = await api.get(`/messages/${conversation.id}`);
-        setMessages(response.data.data);
+        const data = response.data.data;
+        setMessages(Array.isArray(data) ? data : data?.messages || []);
       } catch (error) {
         console.error('Failed to fetch messages:', error);
       } finally {
