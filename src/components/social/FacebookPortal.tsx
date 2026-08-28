@@ -63,7 +63,7 @@ export default function FacebookPortal({ currentUser, onRefreshConversations, on
     fetchConnections();
   }, []);
 
-  const handleRespondRequest = async (connectionId: string, status: 'ACCEPTED' | 'REJECTED') => {
+  const handleRespondRequest = async (connectionId: string, status: 'accepted' | 'rejected') => {
     try {
       await api.put(`/connections/respond/${connectionId}`, { status });
       fetchConnections();
@@ -360,7 +360,7 @@ export default function FacebookPortal({ currentUser, onRefreshConversations, on
                             className="w-full h-8 text-[10px] bg-primary hover:bg-primary/95 text-white font-bold rounded-lg cursor-pointer"
                             onClick={() => {
                               if (req.isReal) {
-                                handleRespondRequest(req.id, 'ACCEPTED');
+                                handleRespondRequest(req.id, 'accepted');
                               } else {
                                 alert('Accepted mock request!');
                               }
@@ -374,7 +374,7 @@ export default function FacebookPortal({ currentUser, onRefreshConversations, on
                             className="w-full h-8 text-[10px] border-transparent bg-secondary/80 hover:bg-secondary text-foreground font-semibold rounded-lg cursor-pointer"
                             onClick={() => {
                               if (req.isReal) {
-                                handleRespondRequest(req.id, 'REJECTED');
+                                handleRespondRequest(req.id, 'rejected');
                               } else {
                                 alert('Deleted mock request');
                               }
@@ -519,7 +519,7 @@ export default function FacebookPortal({ currentUser, onRefreshConversations, on
                     className="h-6.5 text-[9px] font-bold bg-primary hover:bg-primary/95 text-white flex-1 cursor-pointer"
                     onClick={() => {
                       if (req.isReal) {
-                        handleRespondRequest(req.id, 'ACCEPTED');
+                        handleRespondRequest(req.id, 'accepted');
                       } else {
                         alert('Confirmed request');
                       }
@@ -533,7 +533,7 @@ export default function FacebookPortal({ currentUser, onRefreshConversations, on
                     className="h-6.5 text-[9px] font-semibold border-transparent bg-secondary hover:bg-secondary/95 text-foreground flex-1 cursor-pointer"
                     onClick={() => {
                       if (req.isReal) {
-                        handleRespondRequest(req.id, 'REJECTED');
+                        handleRespondRequest(req.id, 'rejected');
                       } else {
                         alert('Deleted request');
                       }

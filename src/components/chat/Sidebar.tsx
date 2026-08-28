@@ -130,7 +130,7 @@ export default function Sidebar({
     }
   };
 
-  const handleRespondRequest = async (connectionId: string, status: 'ACCEPTED' | 'REJECTED') => {
+  const handleRespondRequest = async (connectionId: string, status: 'accepted' | 'rejected') => {
     try {
       await api.put(`/connections/respond/${connectionId}`, { status });
       fetchConnectionsData();
@@ -387,10 +387,10 @@ export default function Sidebar({
                               )}
                               {typeof status === 'object' && status.type === 'incoming' && (
                                 <div className="flex space-x-1">
-                                  <Button size="icon-sm" className="h-6 w-6 text-[10px] rounded bg-primary hover:bg-primary/95 text-white" onClick={() => handleRespondRequest(status.connectionId, 'ACCEPTED')}>
+                                  <Button size="icon-sm" className="h-6 w-6 text-[10px] rounded bg-primary hover:bg-primary/95 text-white" onClick={() => handleRespondRequest(status.connectionId, 'accepted')}>
                                     ✓
                                   </Button>
-                                  <Button variant="outline" size="icon-sm" className="h-6 w-6 text-[10px] rounded border-red-500/30 hover:bg-red-50 dark:hover:bg-red-950/20 text-red-500" onClick={() => handleRespondRequest(status.connectionId, 'REJECTED')}>
+                                  <Button variant="outline" size="icon-sm" className="h-6 w-6 text-[10px] rounded border-red-500/30 hover:bg-red-50 dark:hover:bg-red-950/20 text-red-500" onClick={() => handleRespondRequest(status.connectionId, 'rejected')}>
                                     ✗
                                   </Button>
                                 </div>
@@ -440,7 +440,7 @@ export default function Sidebar({
                             <Button 
                               size="sm" 
                               className="w-full h-7 text-[10px] bg-primary hover:bg-primary/95 text-white font-bold rounded-lg cursor-pointer"
-                              onClick={() => handleRespondRequest(req.id, 'ACCEPTED')}
+                              onClick={() => handleRespondRequest(req.id, 'accepted')}
                             >
                               Confirm
                             </Button>
@@ -448,7 +448,7 @@ export default function Sidebar({
                               variant="outline" 
                               size="sm" 
                               className="w-full h-7 text-[10px] border-transparent bg-secondary/80 hover:bg-secondary text-foreground font-semibold rounded-lg cursor-pointer"
-                              onClick={() => handleRespondRequest(req.id, 'REJECTED')}
+                              onClick={() => handleRespondRequest(req.id, 'rejected')}
                             >
                               Delete
                             </Button>
