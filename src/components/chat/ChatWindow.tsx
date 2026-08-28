@@ -52,6 +52,10 @@ export default function ChatWindow({
         const response = await api.get(`/messages/${conversation.id}`);
         const data = response.data.data;
         setMessages(Array.isArray(data) ? data : data?.messages || []);
+
+        if (socket && user?.id) {
+          socket.emit('message:seen', { conversationId: conversation.id });
+        }
       } catch (error) {
         console.error('Failed to fetch messages:', error);
       } finally {
@@ -74,6 +78,10 @@ export default function ChatWindow({
             return [...prev, message];
           });
           onUpdateLastMessage(conversation.id, message);
+
+          if (message.senderId !== user?.id) {
+            socket.emit('message:seen', { conversationId: conversation.id });
+          }
         }
       };
 
@@ -83,13 +91,25 @@ export default function ChatWindow({
         }
       };
 
+      const handleMessageSeen = (data: { conversationId: string; userId: string }) => {
+        if (data.conversationId === conversation.id && data.userId !== user?.id) {
+          setMessages((prev) =>
+            prev.map((msg) =>
+              msg.senderId === user?.id ? { ...msg, isSeen: true } : msg
+            )
+          );
+        }
+      };
+
       socket.on('message:received', handleNewMessage);
       socket.on('typing:active', handleTyping);
+      socket.on('message:seen', handleMessageSeen);
 
       return () => {
         socket.emit('conversation:leave', conversation.id);
         socket.off('message:received', handleNewMessage);
         socket.off('typing:active', handleTyping);
+        socket.off('message:seen', handleMessageSeen);
       };
     }
   }, [conversation.id, user?.id, socket, onUpdateLastMessage]);
@@ -324,8 +344,13 @@ export default function ChatWindow({
                         )}
                       </div>
                       
-                      <span className="text-[9px] text-muted-foreground mt-1 px-1">
+                      <span className="text-[9px] text-muted-foreground mt-1 px-1 flex items-center gap-1">
                         {format(new Date(msg.createdAt), 'p')}
+                        {isMe && (
+                          <span className={`text-[9px] ${msg.isSeen ? 'text-primary font-extrabold' : 'text-muted-foreground'}`}>
+                            {msg.isSeen ? '• Seen' : '• Sent'}
+                          </span>
+                        )}
                       </span>
                     </div>
                   </div>

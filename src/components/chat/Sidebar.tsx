@@ -65,8 +65,8 @@ export default function Sidebar({
     if (chatFilter === 'groups') return conv.isGroupChat === true;
     if (chatFilter === 'direct') return conv.isGroupChat === false;
     if (chatFilter === 'unread') {
-      // Heuristic: show threads where last message is sent by someone else
-      return conv.lastMessage && conv.lastMessage.senderId !== user?.id && conv.id !== selectedId;
+      const unseenCount = conv.unseenCount || 0;
+      return (unseenCount > 0 || (conv.lastMessage && conv.lastMessage.senderId !== user?.id && !conv.lastMessage.isSeen)) && conv.id !== selectedId;
     }
     return true;
   });
@@ -282,7 +282,8 @@ export default function Sidebar({
             <div className="px-2 space-y-0.5 pb-4">
               {filteredConversations.length > 0 ? (
                 filteredConversations.map((conv) => {
-                  const isUnread = conv.lastMessage && conv.lastMessage.senderId !== user?.id && conv.id !== selectedId;
+                  const unseenCount = conv.unseenCount || 0;
+                  const isUnread = (unseenCount > 0 || (conv.lastMessage && conv.lastMessage.senderId !== user?.id && !conv.lastMessage.isSeen)) && conv.id !== selectedId;
                   return (
                     <button
                       key={conv.id}
@@ -324,7 +325,9 @@ export default function Sidebar({
                             {conv.lastMessage ? conv.lastMessage.content : 'No messages yet'}
                           </p>
                           {isUnread && (
-                            <div className="w-2.5 h-2.5 bg-primary rounded-full flex-shrink-0"></div>
+                            <Badge className="bg-primary hover:bg-primary text-primary-foreground text-[9px] px-1.5 h-4 min-w-[16px] flex items-center justify-center rounded-full font-bold flex-shrink-0">
+                              {conv.unseenCount && conv.unseenCount > 0 ? conv.unseenCount : '1'}
+                            </Badge>
                           )}
                         </div>
                       </div>

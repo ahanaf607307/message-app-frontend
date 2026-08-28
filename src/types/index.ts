@@ -21,6 +21,7 @@ export interface Conversation {
   participants: Participant[];
   messages: Message[];
   lastMessage?: Message;
+  unseenCount?: number;
 }
 
 export interface Participant {
@@ -39,6 +40,7 @@ export interface Message {
   createdAt: string;
   updatedAt: string;
   sender: User;
+  isSeen?: boolean;
 }
 
 export interface AuthResponse {
