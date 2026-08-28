@@ -24,7 +24,7 @@ const spaceGrotesk = Space_Grotesk({
 });
 
 export const metadata: Metadata = {
-  title: "Message App",
+  title: "Your Chat",
   description: "A modern messaging application",
 };
 

@@ -24,24 +24,14 @@ export default function DashboardPortal({ currentUser, onRefreshConversations, o
   const [pendingIncoming, setPendingIncoming] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
 
-  // Likes state for mock posts
-  const [likedPosts, setLikedPosts] = useState<Record<number, boolean>>({});
-  const [likeCounts, setLikeCounts] = useState<Record<number, number>>({
-    1: 76,
-    2: 12,
-    3: 8
-  });
-
-  const handleToggleLike = (postId: number) => {
-    setLikedPosts(prev => {
-      const isLiked = !prev[postId];
-      setLikeCounts(counts => ({
-        ...counts,
-        [postId]: isLiked ? counts[postId] + 1 : counts[postId] - 1
-      }));
-      return { ...prev, [postId]: isLiked };
-    });
-  };
+  // Social feed state
+  const [posts, setPosts] = useState<any[]>([]);
+  const [storiesList, setStoriesList] = useState<any[]>([]);
+  const [postContent, setPostContent] = useState('');
+  const [postMediaUrl, setPostMediaUrl] = useState('');
+  const [showMediaInput, setShowMediaInput] = useState(false);
+  const [activePostCommentsId, setActivePostCommentsId] = useState<string | null>(null);
+  const [commentInput, setCommentInput] = useState('');
 
   const fetchConnections = async () => {
     setLoading(true);
@@ -59,8 +49,28 @@ export default function DashboardPortal({ currentUser, onRefreshConversations, o
     }
   };
 
+  const fetchPosts = async () => {
+    try {
+      const res = await api.get('/posts');
+      setPosts(res.data.data || []);
+    } catch (err) {
+      console.error('Failed to fetch posts:', err);
+    }
+  };
+
+  const fetchStories = async () => {
+    try {
+      const res = await api.get('/stories');
+      setStoriesList(res.data.data || []);
+    } catch (err) {
+      console.error('Failed to fetch stories:', err);
+    }
+  };
+
   useEffect(() => {
     fetchConnections();
+    fetchPosts();
+    fetchStories();
   }, []);
 
   const handleRespondRequest = async (connectionId: string, status: 'accepted' | 'rejected') => {
@@ -84,51 +94,60 @@ export default function DashboardPortal({ currentUser, onRefreshConversations, o
     }
   };
 
-  // Mock Stories Data
-  const stories = [
-    { id: 1, name: 'ZASKA', bg: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=200&auto=format&fit=crop&q=60', avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=80&auto=format&fit=crop&q=80' },
-    { id: 2, name: 'Akla Polash', bg: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=200&auto=format&fit=crop&q=60', avatar: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=80&auto=format&fit=crop&q=80' },
-    { id: 3, name: 'Saodiat Hasan', bg: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=200&auto=format&fit=crop&q=60', avatar: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=80&auto=format&fit=crop&q=80' },
-    { id: 4, name: 'Abdullah Abrar', bg: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=200&auto=format&fit=crop&q=60', avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=80&auto=format&fit=crop&q=80' }
-  ];
-
-  // Dummy News Feed Posts
-  const dummyPosts = [
-    {
-      id: 1,
-      author: 'Abdullah bin Abdur Razzak',
-      avatar: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=80&auto=format&fit=crop&q=80',
-      time: 'Just now',
-      text: 'সরাসরি সম্প্রচার | শারদীয়া শুভেচ্ছা | পর্ব ০১ | শায়খ আবদুল্লাহ বিন আবদুর রাজ্জাক | Al-Ibtisam TV',
-      isLive: true,
-      mediaUrl: 'https://images.unsplash.com/photo-1461749280684-dccba630e2f6?w=600&auto=format&fit=crop&q=80',
-      comments: 37
-    },
-    {
-      id: 2,
-      author: 'Mohammad Islam',
-      avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=80&auto=format&fit=crop&q=80',
-      time: '10 hours ago',
-      text: 'Loving the new green & orange theme layout! It feels extremely fluid and looks premium. Let me know what you guys think about the customization updates! 🌳🧡',
-      isLive: false,
-      mediaUrl: 'https://images.unsplash.com/photo-1506744038136-46273834b3fb?w=600&auto=format&fit=crop&q=80',
-      comments: 19
-    },
-    {
-      id: 3,
-      author: 'HM Humayun Kobir',
-      avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=80&auto=format&fit=crop&q=80',
-      time: '1 day ago',
-      text: 'Connected with friends, searched for users, and updated the control center console details successfully. Testing the chat socket feeds next.',
-      isLive: false,
-      comments: 5
+  const handleCreatePost = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!postContent.trim() && !postMediaUrl.trim()) return;
+    try {
+      await api.post('/posts', {
+        content: postContent,
+        mediaUrl: postMediaUrl.trim() || null
+      });
+      setPostContent('');
+      setPostMediaUrl('');
+      setShowMediaInput(false);
+      fetchPosts();
+    } catch (err: any) {
+      alert('Failed to publish post');
     }
-  ];
+  };
+
+  const handleCreateStory = async () => {
+    const mediaUrl = prompt('Enter image URL to create a story:');
+    if (!mediaUrl || !mediaUrl.trim()) return;
+    try {
+      await api.post('/stories', { mediaUrl: mediaUrl.trim() });
+      fetchStories();
+    } catch (err: any) {
+      alert('Failed to share story');
+    }
+  };
+
+  const handleToggleLike = async (postId: string) => {
+    try {
+      await api.post(`/posts/${postId}/like`);
+      fetchPosts();
+    } catch (err) {
+      console.error('Failed to toggle like:', err);
+    }
+  };
+
+  const handleAddComment = async (postId: string) => {
+    if (!commentInput.trim()) return;
+    try {
+      await api.post(`/posts/${postId}/comments`, {
+        content: commentInput
+      });
+      setCommentInput('');
+      fetchPosts();
+    } catch (err: any) {
+      alert('Failed to add comment');
+    }
+  };
 
   const requestsToRender = pendingIncoming.map(r => ({
     id: r.id,
     sender: r.sender,
-    mutualCount: Math.floor(Math.random() * 10) + 1,
+    mutualCount: Math.floor(Math.random() * 5) + 1,
     isReal: true
   }));
 
@@ -147,7 +166,7 @@ export default function DashboardPortal({ currentUser, onRefreshConversations, o
       <div className="flex-1 overflow-y-auto no-scrollbar p-6 bg-muted/10">
         <div className="max-w-[620px] mx-auto space-y-6 pb-12">
           
-          {/* Sub Navigation Tabs (Feed / Requests / Friends) */}
+          {/* Sub Navigation Tabs */}
           <div className="flex border-b border-border bg-card rounded-xl p-1 shadow-2xs">
             <Button
               variant="ghost"
@@ -182,10 +201,12 @@ export default function DashboardPortal({ currentUser, onRefreshConversations, o
               {/* Stories Carousel */}
               <div className="flex space-x-2.5 overflow-x-auto pb-1 no-scrollbar select-none">
                 {/* Create Story Card */}
-                <div className="w-[110px] h-[175px] bg-card border border-border/60 rounded-xl overflow-hidden shadow-2xs relative flex flex-col flex-shrink-0 cursor-pointer group hover:border-primary/30 transition-all">
+                <div 
+                  onClick={handleCreateStory}
+                  className="w-[110px] h-[175px] bg-card border border-border/60 rounded-xl overflow-hidden shadow-2xs relative flex flex-col flex-shrink-0 cursor-pointer group hover:border-primary/30 transition-all"
+                >
                   <div className="h-[120px] bg-muted relative overflow-hidden">
                     {currentUser?.avatarUrl ? (
-                      // eslint-disable-next-line @next/next/no-img-element
                       <img src={currentUser.avatarUrl} alt="Avatar" className="w-full h-full object-cover group-hover:scale-105 transition-all duration-300" />
                     ) : (
                       <div className="w-full h-full flex items-center justify-center text-2xl font-bold bg-primary/5 text-primary">
@@ -201,14 +222,13 @@ export default function DashboardPortal({ currentUser, onRefreshConversations, o
                   </div>
                 </div>
 
-                {/* Dummy Stories */}
-                {stories.map(story => (
+                {/* Render Stories */}
+                {storiesList.map(story => (
                   <div key={story.id} className="w-[110px] h-[175px] rounded-xl overflow-hidden shadow-2xs relative flex-shrink-0 cursor-pointer group border border-border/20">
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
                     <img src={story.bg} alt={story.name} className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-all duration-500" />
                     <div className="absolute inset-0 bg-linear-to-b from-black/20 via-transparent to-black/80"></div>
                     <Avatar className="absolute top-2 left-2 h-7 w-7 border-2 border-primary shadow-md">
-                      <AvatarImage src={story.avatar} />
+                      <AvatarImage src={story.avatar || undefined} />
                       <AvatarFallback className="text-[9px]">{story.name.charAt(0)}</AvatarFallback>
                     </Avatar>
                     <span className="absolute bottom-2 left-2 right-2 text-[10px] font-bold text-white truncate">{story.name}</span>
@@ -219,112 +239,158 @@ export default function DashboardPortal({ currentUser, onRefreshConversations, o
               {/* Create Post Box */}
               <Card className="shadow-2xs border-border/50 bg-card overflow-hidden">
                 <CardContent className="p-4 space-y-3.5">
-                  <div className="flex items-center space-x-3">
-                    <Avatar className="h-9 w-9 border border-border">
-                      <AvatarImage src={currentUser?.avatarUrl} />
-                      <AvatarFallback className="bg-primary/5 text-primary font-bold">{currentUser?.name?.charAt(0)}</AvatarFallback>
-                    </Avatar>
-                    <input 
-                      type="text" 
-                      placeholder={`What's on your mind, ${currentUser?.name || 'User'}?`}
-                      className="flex-1 h-9 bg-muted/40 rounded-full border border-transparent px-4 text-xs focus:outline-hidden focus:border-primary/40 focus:bg-card transition-all cursor-pointer"
-                    />
-                  </div>
-                  <div className="border-t border-border/60 pt-3 flex items-center justify-between text-muted-foreground text-xs px-1">
-                    <button className="flex items-center space-x-2 hover:bg-muted/40 px-2 py-1.5 rounded-lg cursor-pointer transition-colors text-red-500 font-semibold">
-                      <Video className="h-4 w-4" /> <span>Live video</span>
-                    </button>
-                    <button className="flex items-center space-x-2 hover:bg-muted/40 px-2 py-1.5 rounded-lg cursor-pointer transition-colors text-green-500 font-semibold">
-                      <ImageIcon className="h-4 w-4" /> <span>Photo/video</span>
-                    </button>
-                    <button className="flex items-center space-x-2 hover:bg-muted/40 px-2 py-1.5 rounded-lg cursor-pointer transition-colors text-amber-500 font-semibold">
-                      <Smile className="h-4 w-4" /> <span>Feeling/activity</span>
-                    </button>
-                  </div>
+                  <form onSubmit={handleCreatePost} className="space-y-3">
+                    <div className="flex items-center space-x-3">
+                      <Avatar className="h-9 w-9 border border-border">
+                        <AvatarImage src={currentUser?.avatarUrl} />
+                        <AvatarFallback className="bg-primary/5 text-primary font-bold">{currentUser?.name?.charAt(0)}</AvatarFallback>
+                      </Avatar>
+                      <input 
+                        type="text" 
+                        placeholder={`What's on your mind, ${currentUser?.name || 'User'}?`}
+                        className="flex-1 h-9 bg-muted/40 rounded-full border border-transparent px-4 text-xs focus:outline-hidden focus:border-primary/40 focus:bg-card transition-all"
+                        value={postContent}
+                        onChange={(e) => setPostContent(e.target.value)}
+                      />
+                    </div>
+
+                    {showMediaInput && (
+                      <input 
+                        type="text" 
+                        placeholder="Paste photo or media URL here..."
+                        className="w-full h-8 bg-muted/40 rounded-lg border border-transparent px-3 text-[11px] focus:outline-hidden focus:border-primary/40 focus:bg-card transition-all"
+                        value={postMediaUrl}
+                        onChange={(e) => setPostMediaUrl(e.target.value)}
+                      />
+                    )}
+
+                    <div className="border-t border-border/60 pt-3 flex items-center justify-between text-muted-foreground text-xs px-1">
+                      <button 
+                        type="button"
+                        onClick={() => setShowMediaInput(!showMediaInput)}
+                        className={`flex items-center space-x-2 hover:bg-muted/40 px-2 py-1.5 rounded-lg cursor-pointer transition-colors font-semibold ${showMediaInput ? 'text-primary' : 'text-green-500'}`}
+                      >
+                        <ImageIcon className="h-4 w-4" /> <span>Photo/video</span>
+                      </button>
+                      <button 
+                        type="submit"
+                        className="h-8 px-4 text-[10px] bg-primary hover:bg-primary/95 text-white font-bold rounded-lg cursor-pointer"
+                      >
+                        Publish Post
+                      </button>
+                    </div>
+                  </form>
                 </CardContent>
               </Card>
 
               {/* Posts Feed */}
               <div className="space-y-4">
-                {dummyPosts.map((post) => (
-                  <Card key={post.id} className="shadow-2xs border-border/50 bg-card overflow-hidden animate-fade-in">
-                    <CardContent className="p-4 space-y-3">
-                      {/* Post Header */}
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center space-x-2.5">
-                          <Avatar className="h-9 w-9 border">
-                            <AvatarImage src={post.avatar} />
-                            <AvatarFallback className="font-bold bg-muted">{post.author.charAt(0)}</AvatarFallback>
-                          </Avatar>
-                          <div>
-                            <div className="flex items-center space-x-1.5">
-                              <h4 className="text-xs font-bold text-foreground">{post.author}</h4>
-                              {post.isLive && (
-                                <Badge className="bg-red-500 hover:bg-red-500 text-white text-[8px] font-black h-4 px-1.5 uppercase flex items-center gap-0.5">
-                                  <Video className="h-2.5 w-2.5" /> LIVE
-                                </Badge>
-                              )}
+                {posts.length > 0 ? (
+                  posts.map((post) => (
+                    <Card key={post.id} className="shadow-2xs border-border/50 bg-card overflow-hidden animate-fade-in">
+                      <CardContent className="p-4 space-y-3">
+                        {/* Post Header */}
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center space-x-2.5">
+                            <Avatar className="h-9 w-9 border">
+                              <AvatarImage src={post.author.avatarUrl || undefined} />
+                              <AvatarFallback className="font-bold bg-muted">{post.author.name.charAt(0)}</AvatarFallback>
+                            </Avatar>
+                            <div>
+                              <h4 className="text-xs font-bold text-foreground">{post.author.name}</h4>
+                              <p className="text-[10px] text-muted-foreground flex items-center gap-1.5 mt-0.5">
+                                <span>{new Date(post.createdAt).toLocaleDateString()}</span> • <Globe className="h-3 w-3" />
+                              </p>
                             </div>
-                            <p className="text-[10px] text-muted-foreground flex items-center gap-1.5 mt-0.5">
-                              <span>{post.time}</span> • <Globe className="h-3 w-3" />
-                            </p>
                           </div>
                         </div>
-                      </div>
 
-                      {/* Post Content */}
-                      <p className="text-xs text-foreground leading-relaxed font-medium">{post.text}</p>
+                        {/* Post Content */}
+                        {post.content && (
+                          <p className="text-xs text-foreground leading-relaxed font-medium">{post.content}</p>
+                        )}
 
-                      {/* Post Attachment */}
-                      {post.mediaUrl && (
-                        <div className="relative rounded-lg overflow-hidden bg-muted border border-border/30 group">
-                          {/* eslint-disable-next-line @next/next/no-img-element */}
-                          <img src={post.mediaUrl} alt="Attachment" className="w-full h-auto object-cover max-h-[340px]" />
-                          {post.isLive && (
-                            <div className="absolute inset-0 bg-black/25 flex items-center justify-center cursor-pointer group-hover:bg-black/35 transition-colors">
-                              <div className="h-14 w-14 rounded-full bg-primary text-white flex items-center justify-center shadow-lg shadow-primary/20 scale-100 group-hover:scale-105 transition-transform">
-                                <Play className="h-6 w-6 fill-current ml-1" />
+                        {/* Post Attachment */}
+                        {post.mediaUrl && (
+                          <div className="relative rounded-lg overflow-hidden bg-muted border border-border/30 group">
+                            <img src={post.mediaUrl} alt="Attachment" className="w-full h-auto object-cover max-h-[340px]" />
+                          </div>
+                        )}
+
+                        {/* Post Stats */}
+                        <div className="flex items-center justify-between text-[10px] text-muted-foreground pt-1 border-b border-border/50 pb-2 px-0.5">
+                          <div className="flex items-center space-x-1">
+                            <Heart className="h-3.5 w-3.5 text-primary fill-primary" />
+                            <span className="font-bold text-foreground">{post.likesCount} Likes</span>
+                          </div>
+                          <div className="flex space-x-2">
+                            <span>{post.commentsCount} Comments</span>
+                          </div>
+                        </div>
+
+                        {/* Post Actions */}
+                        <div className="flex items-center justify-between text-muted-foreground text-xs pt-1">
+                          <button 
+                            onClick={() => handleToggleLike(post.id)}
+                            className={`flex-1 flex items-center justify-center space-x-2 hover:bg-muted/40 py-1.5 rounded-lg cursor-pointer transition-colors font-bold ${post.userLiked ? 'text-primary' : ''}`}
+                          >
+                            <Heart className={`h-4 w-4 ${post.userLiked ? 'fill-primary text-primary' : ''}`} /> 
+                            <span>{post.userLiked ? 'Liked' : 'Like'}</span>
+                          </button>
+                          <button 
+                            onClick={() => setActivePostCommentsId(activePostCommentsId === post.id ? null : post.id)}
+                            className={`flex-1 flex items-center justify-center space-x-2 hover:bg-muted/40 py-1.5 rounded-lg cursor-pointer transition-colors font-bold ${activePostCommentsId === post.id ? 'text-primary' : ''}`}
+                          >
+                            <MessageSquare className="h-4 w-4" /> <span>Comment</span>
+                          </button>
+                        </div>
+
+                        {/* Comments Drawer Expansion */}
+                        {activePostCommentsId === post.id && (
+                          <div className="border-t border-border/50 pt-3 space-y-3 animate-fade-in">
+                            {post.comments && post.comments.map((comment: any) => (
+                              <div key={comment.id} className="flex items-start space-x-2.5 text-xs">
+                                <Avatar className="h-7 w-7 border">
+                                  <AvatarImage src={comment.user.avatarUrl || undefined} />
+                                  <AvatarFallback className="font-bold bg-muted">{comment.user.name.charAt(0)}</AvatarFallback>
+                                </Avatar>
+                                <div className="bg-muted/40 p-2.5 rounded-2xl flex-1">
+                                  <span className="font-bold text-foreground block mb-0.5">{comment.user.name}</span>
+                                  <p className="text-muted-foreground leading-relaxed font-medium">{comment.content}</p>
+                                </div>
                               </div>
-                              <span className="absolute top-3 left-3 bg-black/60 backdrop-blur-xs text-white text-[9px] font-bold px-2 py-0.5 rounded flex items-center gap-1">
-                                <span className="h-1.5 w-1.5 bg-red-500 rounded-full animate-ping"></span> 76 viewers
-                              </span>
+                            ))}
+
+                            {/* Comment Input */}
+                            <div className="flex items-center space-x-2 pt-1.5">
+                              <input 
+                                type="text" 
+                                placeholder="Write a comment..."
+                                className="flex-1 h-8 bg-muted/40 rounded-full border border-transparent px-3 text-xs focus:outline-hidden focus:border-primary/40 focus:bg-card transition-all"
+                                value={commentInput}
+                                onChange={(e) => setCommentInput(e.target.value)}
+                                onKeyDown={(e) => {
+                                  if (e.key === 'Enter') handleAddComment(post.id);
+                                }}
+                              />
+                              <Button 
+                                size="sm" 
+                                className="h-8 text-[10px] bg-primary hover:bg-primary/95 text-white font-bold rounded-lg cursor-pointer"
+                                onClick={() => handleAddComment(post.id)}
+                              >
+                                Send
+                              </Button>
                             </div>
-                          )}
-                        </div>
-                      )}
-
-                      {/* Post Stats */}
-                      <div className="flex items-center justify-between text-[10px] text-muted-foreground pt-1 border-b border-border/50 pb-2 px-0.5">
-                        <div className="flex items-center space-x-1">
-                          <Heart className="h-3.5 w-3.5 text-primary fill-primary" />
-                          <span className="font-bold text-foreground">{likeCounts[post.id]} Likes</span>
-                        </div>
-                        <div className="flex space-x-2">
-                          <span>{post.comments} Comments</span>
-                          <span>•</span>
-                          <span>2 Shares</span>
-                        </div>
-                      </div>
-
-                      {/* Post Actions */}
-                      <div className="flex items-center justify-between text-muted-foreground text-xs pt-1">
-                        <button 
-                          onClick={() => handleToggleLike(post.id)}
-                          className={`flex-1 flex items-center justify-center space-x-2 hover:bg-muted/40 py-1.5 rounded-lg cursor-pointer transition-colors font-bold ${likedPosts[post.id] ? 'text-primary' : ''}`}
-                        >
-                          <Heart className={`h-4 w-4 ${likedPosts[post.id] ? 'fill-primary text-primary' : ''}`} /> 
-                          <span>{likedPosts[post.id] ? 'Liked' : 'Like'}</span>
-                        </button>
-                        <button className="flex-1 flex items-center justify-center space-x-2 hover:bg-muted/40 py-1.5 rounded-lg cursor-pointer transition-colors font-bold">
-                          <MessageSquare className="h-4 w-4" /> <span>Comment</span>
-                        </button>
-                        <button className="flex-1 flex-row flex items-center justify-center space-x-2 hover:bg-muted/40 py-1.5 rounded-lg cursor-pointer transition-colors font-bold">
-                          <Share2 className="h-4 w-4" /> <span>Share</span>
-                        </button>
-                      </div>
-                    </CardContent>
-                  </Card>
-                ))}
+                          </div>
+                        )}
+                      </CardContent>
+                    </Card>
+                  ))
+                ) : (
+                  <div className="text-center py-10 bg-card border border-border/50 rounded-xl">
+                    <p className="text-sm text-muted-foreground font-semibold">No posts found. Share your thoughts to get started!</p>
+                  </div>
+                )}
               </div>
             </>
           ) : activeSubTab === 'requests' ? (
@@ -342,7 +408,6 @@ export default function DashboardPortal({ currentUser, onRefreshConversations, o
                     <Card key={req.id} className="shadow-xs border-border/50 bg-card rounded-xl overflow-hidden flex flex-col hover:border-border/80 transition-colors group">
                       <div className="aspect-square bg-muted relative overflow-hidden flex-shrink-0 animate-fade-in">
                         {req.sender.avatarUrl ? (
-                          // eslint-disable-next-line @next/next/no-img-element
                           <img src={req.sender.avatarUrl} alt={req.sender.name} className="w-full h-full object-cover group-hover:scale-102 transition-transform duration-300" />
                         ) : (
                           <div className="w-full h-full flex items-center justify-center font-bold text-xl bg-primary/5 text-primary">
@@ -401,7 +466,6 @@ export default function DashboardPortal({ currentUser, onRefreshConversations, o
                     <Card key={friend.id} className="shadow-xs border-border/50 bg-card rounded-xl overflow-hidden flex flex-col hover:border-border/80 transition-colors group">
                       <div className="aspect-square bg-muted relative overflow-hidden flex-shrink-0">
                         {friend.avatarUrl ? (
-                          // eslint-disable-next-line @next/next/no-img-element
                           <img src={friend.avatarUrl} alt={friend.name} className="w-full h-full object-cover group-hover:scale-102 transition-transform duration-300" />
                         ) : (
                           <div className="w-full h-full flex items-center justify-center font-bold text-xl bg-primary/5 text-primary">
@@ -459,14 +523,13 @@ export default function DashboardPortal({ currentUser, onRefreshConversations, o
         </div>
       </div>
 
-      {/* Right Column (Sponsored, Birthdays, Active Panel Contacts) - Visible on lg screens */}
+      {/* Right Column */}
       <div className="hidden lg:block w-72 border-l border-border p-4 space-y-6 overflow-y-auto bg-background select-none">
-        {/* Sponsored / Ads widget */}
+        {/* Sponsored */}
         <div className="space-y-3">
           <h5 className="text-[11px] font-bold text-muted-foreground uppercase tracking-wider">Sponsored</h5>
           <div className="flex items-center space-x-3.5 cursor-pointer hover:bg-muted/30 p-1.5 rounded-lg transition-colors">
             <div className="h-14 w-20 rounded bg-muted overflow-hidden flex-shrink-0 border border-border/40">
-              {/* eslint-disable-next-line @next/next/no-img-element */}
               <img src="https://images.unsplash.com/photo-1506744038136-46273834b3fb?w=100&auto=format&fit=crop&q=60" alt="Ad" className="w-full h-full object-cover" />
             </div>
             <div className="min-w-0">
@@ -484,14 +547,14 @@ export default function DashboardPortal({ currentUser, onRefreshConversations, o
           <div className="flex items-start space-x-3 text-xs leading-relaxed text-foreground">
             <Gift className="h-5 w-5 text-primary flex-shrink-0 mt-0.5 animate-bounce" />
             <p className="text-[11px]">
-              <strong>সস্বপ্নের ঘর</strong> and <strong>3 others</strong> have birthdays today. Send them warm wishes!
+              <strong>HM Humayun Kobir</strong> and <strong>2 others</strong> have birthdays today. Send them warm wishes!
             </p>
           </div>
         </div>
 
         <div className="h-[1px] bg-border opacity-50"></div>
 
-        {/* Friend Requests Preview (same style as screenshot 2 right sidebar) */}
+        {/* Connection Requests Preview */}
         {requestsToRender.slice(0, 1).map(req => (
           <div key={req.id} className="space-y-2.5">
             <div className="flex items-center justify-between">
