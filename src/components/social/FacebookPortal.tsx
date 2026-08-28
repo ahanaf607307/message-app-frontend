@@ -114,28 +114,20 @@ export default function FacebookPortal({ currentUser, onRefreshConversations, on
     }
   ];
 
-  // Dummy Requests fallback if API has no requests
-  const dummyRequests = [
-    { id: 'mock-1', sender: { name: 'Aesthetic Man', avatarUrl: 'https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?w=200&auto=format&fit=crop&q=80' }, mutualCount: 11 },
-    { id: 'mock-2', sender: { name: 'A H Rayhan', avatarUrl: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=200&auto=format&fit=crop&q=80' }, mutualCount: 5 },
-    { id: 'mock-3', sender: { name: 'Momena Begum', avatarUrl: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=200&auto=format&fit=crop&q=80' }, mutualCount: 8 },
-    { id: 'mock-4', sender: { name: 'Nijhum Mon', avatarUrl: 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=200&auto=format&fit=crop&q=80' }, mutualCount: 2 }
-  ];
+  const requestsToRender = pendingIncoming.map(r => ({
+    id: r.id,
+    sender: r.sender,
+    mutualCount: Math.floor(Math.random() * 10) + 1,
+    isReal: true
+  }));
 
-  const requestsToRender = pendingIncoming.length > 0 
-    ? pendingIncoming.map(r => ({ id: r.id, sender: r.sender, mutualCount: Math.floor(Math.random() * 15), isReal: true }))
-    : dummyRequests.map(r => ({ ...r, isReal: false }));
-
-  // Dummy Friends fallback if API has no friends
-  const dummyFriends = [
-    { id: 'mock-f1', name: 'MH Supto', avatarUrl: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=200&auto=format&fit=crop&q=80', status: 'Active Now' },
-    { id: 'mock-f2', name: 'Mishkat Islam', avatarUrl: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=200&auto=format&fit=crop&q=80', status: 'Away' },
-    { id: 'mock-f3', name: 'Shahriar Monir', avatarUrl: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=200&auto=format&fit=crop&q=80', status: 'Offline' }
-  ];
-
-  const friendsToRender = friends.length > 0
-    ? friends.map(f => ({ id: f.id, name: f.name, avatarUrl: f.avatarUrl, status: 'Connected', isReal: true }))
-    : dummyFriends.map(f => ({ ...f, isReal: false }));
+  const friendsToRender = friends.map(f => ({
+    id: f.id,
+    name: f.name,
+    avatarUrl: f.avatarUrl,
+    status: 'Connected',
+    isReal: true
+  }));
 
   return (
     <div className="flex-1 flex overflow-hidden h-full bg-background text-foreground font-sans-active">
@@ -345,9 +337,6 @@ export default function FacebookPortal({ currentUser, onRefreshConversations, on
                             {req.sender.name.charAt(0)}
                           </div>
                         )}
-                        {!req.isReal && (
-                          <Badge variant="outline" className="absolute top-2 right-2 text-[8px] bg-card/90 backdrop-blur-xs border-transparent shadow-xs">Mock</Badge>
-                        )}
                       </div>
                       <div className="p-3 flex flex-col flex-1 justify-between min-h-[110px] bg-muted/5">
                         <div>
@@ -359,11 +348,7 @@ export default function FacebookPortal({ currentUser, onRefreshConversations, on
                             size="sm" 
                             className="w-full h-8 text-[10px] bg-primary hover:bg-primary/95 text-white font-bold rounded-lg cursor-pointer"
                             onClick={() => {
-                              if (req.isReal) {
-                                handleRespondRequest(req.id, 'accepted');
-                              } else {
-                                alert('Accepted mock request!');
-                              }
+                              handleRespondRequest(req.id, 'accepted');
                             }}
                           >
                             Confirm
@@ -373,11 +358,7 @@ export default function FacebookPortal({ currentUser, onRefreshConversations, on
                             size="sm" 
                             className="w-full h-8 text-[10px] border-transparent bg-secondary/80 hover:bg-secondary text-foreground font-semibold rounded-lg cursor-pointer"
                             onClick={() => {
-                              if (req.isReal) {
-                                handleRespondRequest(req.id, 'rejected');
-                              } else {
-                                alert('Deleted mock request');
-                              }
+                              handleRespondRequest(req.id, 'rejected');
                             }}
                           >
                             Delete
@@ -415,9 +396,6 @@ export default function FacebookPortal({ currentUser, onRefreshConversations, on
                             {friend.name.charAt(0)}
                           </div>
                         )}
-                        {!friend.isReal && (
-                          <Badge variant="outline" className="absolute top-2 right-2 text-[8px] bg-card/90 backdrop-blur-xs border-transparent shadow-xs">Mock</Badge>
-                        )}
                       </div>
                       <div className="p-3 flex flex-col flex-1 justify-between min-h-[90px] bg-muted/5">
                         <div>
@@ -431,18 +409,14 @@ export default function FacebookPortal({ currentUser, onRefreshConversations, on
                             size="sm" 
                             className="w-full h-7 text-[10px] bg-primary hover:bg-primary/95 text-white font-bold rounded-lg cursor-pointer"
                             onClick={async () => {
-                              if (friend.isReal) {
-                                try {
-                                  const res = await api.post('/conversations/create', {
-                                    participantIds: [friend.id],
-                                    isGroupChat: false
-                                  });
-                                  onSelectConversation(res.data.data);
-                                } catch (e: any) {
-                                  alert('Failed to start chat session');
-                                }
-                              } else {
-                                alert(`Chatting with mock connection: ${friend.name}`);
+                              try {
+                                const res = await api.post('/conversations/create', {
+                                  participantIds: [friend.id],
+                                  isGroupChat: false
+                                });
+                                onSelectConversation(res.data.data);
+                              } catch (e: any) {
+                                alert('Failed to start chat session');
                               }
                             }}
                           >
@@ -518,11 +492,7 @@ export default function FacebookPortal({ currentUser, onRefreshConversations, on
                     size="sm" 
                     className="h-6.5 text-[9px] font-bold bg-primary hover:bg-primary/95 text-white flex-1 cursor-pointer"
                     onClick={() => {
-                      if (req.isReal) {
-                        handleRespondRequest(req.id, 'accepted');
-                      } else {
-                        alert('Confirmed request');
-                      }
+                      handleRespondRequest(req.id, 'accepted');
                     }}
                   >
                     Confirm
@@ -532,11 +502,7 @@ export default function FacebookPortal({ currentUser, onRefreshConversations, on
                     size="sm" 
                     className="h-6.5 text-[9px] font-semibold border-transparent bg-secondary hover:bg-secondary/95 text-foreground flex-1 cursor-pointer"
                     onClick={() => {
-                      if (req.isReal) {
-                        handleRespondRequest(req.id, 'rejected');
-                      } else {
-                        alert('Deleted request');
-                      }
+                      handleRespondRequest(req.id, 'rejected');
                     }}
                   >
                     Delete
