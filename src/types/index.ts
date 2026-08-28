@@ -9,6 +9,7 @@ export interface User {
   isVerified: boolean;
   createdAt: string;
   updatedAt: string;
+  connectionId?: string;
 }
 
 export interface Conversation {

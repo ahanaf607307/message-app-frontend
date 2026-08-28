@@ -478,11 +478,11 @@ export default function Sidebar({
                           </Avatar>
                           <span className="text-xs font-semibold truncate">{friend.name}</span>
                         </div>
-                        <div className="flex items-center">
+                        <div className="flex items-center space-x-1.5">
                           <Button 
                             size="sm" 
                             variant="ghost" 
-                            className="h-7 text-xs px-2.5 text-primary hover:bg-primary/5 hover:text-primary font-bold cursor-pointer"
+                            className="h-7 text-[10px] px-2 text-primary hover:bg-primary/5 hover:text-primary font-bold cursor-pointer"
                             onClick={async () => {
                               try {
                                 const res = await api.post('/conversations/create', {
@@ -498,6 +498,17 @@ export default function Sidebar({
                           >
                             Chat
                           </Button>
+                          {friend.connectionId && (
+                            <Button 
+                              size="sm" 
+                              variant="ghost" 
+                              className="h-7 w-7 p-0 text-red-500 hover:bg-red-50 dark:hover:bg-red-950/20 font-bold cursor-pointer"
+                              title="Disconnect connection"
+                              onClick={() => handleRemoveConnection(friend.connectionId!)}
+                            >
+                              ✗
+                            </Button>
+                          )}
                         </div>
                       </div>
                     ))}

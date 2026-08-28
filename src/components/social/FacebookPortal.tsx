@@ -73,6 +73,17 @@ export default function FacebookPortal({ currentUser, onRefreshConversations, on
     }
   };
 
+  const handleRemoveConnection = async (connectionId: string) => {
+    if (!confirm('Are you sure you want to disconnect this connection?')) return;
+    try {
+      await api.delete(`/connections/${connectionId}`);
+      fetchConnections();
+      onRefreshConversations();
+    } catch (err: any) {
+      alert(err.response?.data?.message || 'Failed to disconnect');
+    }
+  };
+
   // Mock Stories Data
   const stories = [
     { id: 1, name: 'ZASKA', bg: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=200&auto=format&fit=crop&q=60', avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=80&auto=format&fit=crop&q=80' },
@@ -126,7 +137,8 @@ export default function FacebookPortal({ currentUser, onRefreshConversations, on
     name: f.name,
     avatarUrl: f.avatarUrl,
     status: 'Connected',
-    isReal: true
+    isReal: true,
+    connectionId: f.connectionId
   }));
 
   return (
@@ -404,10 +416,10 @@ export default function FacebookPortal({ currentUser, onRefreshConversations, on
                             <span className="h-1.5 w-1.5 bg-green-500 rounded-full"></span> {friend.status}
                           </span>
                         </div>
-                        <div className="mt-3">
+                        <div className="mt-3 flex space-x-1.5">
                           <Button 
                             size="sm" 
-                            className="w-full h-7 text-[10px] bg-primary hover:bg-primary/95 text-white font-bold rounded-lg cursor-pointer"
+                            className="flex-grow h-7 text-[10px] bg-primary hover:bg-primary/95 text-white font-bold rounded-lg cursor-pointer"
                             onClick={async () => {
                               try {
                                 const res = await api.post('/conversations/create', {
@@ -422,6 +434,16 @@ export default function FacebookPortal({ currentUser, onRefreshConversations, on
                           >
                             Open Chat
                           </Button>
+                          {friend.connectionId && (
+                            <Button 
+                              variant="outline"
+                              size="sm" 
+                              className="h-7 px-2 text-[10px] border-red-500/30 text-red-500 hover:bg-red-50 dark:hover:bg-red-950/20 font-bold rounded-lg cursor-pointer"
+                              onClick={() => handleRemoveConnection(friend.connectionId!)}
+                            >
+                              Disconnect
+                            </Button>
+                          )}
                         </div>
                       </div>
                     </Card>
