@@ -191,6 +191,8 @@ export default function Home() {
     }
   };
 
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+
   if (authLoading || (loading && !conversations.length)) {
     return (
       <div className="flex items-center justify-center h-screen bg-background">
@@ -200,21 +202,39 @@ export default function Home() {
   }
 
   return (
-    <main className="flex h-screen overflow-hidden bg-background text-foreground">
-      <Sidebar 
-        conversations={conversations} 
-        onSelectConversation={setSelectedConversation}
-        selectedId={selectedConversation?.id}
-        onOpenProfile={openProfileModal}
-        onOpenChangePassword={() => {
-          setFormError(null);
-          setIsChangePasswordOpen(true);
-        }}
-        onOpenNewChat={openNewGroupModal}
-        onRefreshConversations={fetchConversations}
-      />
-      <div className="flex-1 flex flex-col h-full bg-muted/10">
-        {selectedConversation ? (
+    <main className="flex h-screen overflow-hidden bg-[#faf6f0] text-[#0b4d3a] relative font-sans-active">
+      {/* Left Sidebar Menu Drawer */}
+      {isSidebarOpen && (
+        <div className="w-85 border-r border-[#ecd8bf]/60 flex-shrink-0 h-full z-20 bg-background shadow-lg transition-all duration-300">
+          <Sidebar 
+            conversations={conversations} 
+            onSelectConversation={setSelectedConversation}
+            selectedId={selectedConversation?.id}
+            onOpenProfile={openProfileModal}
+            onOpenChangePassword={() => {
+              setFormError(null);
+              setIsChangePasswordOpen(true);
+            }}
+            onOpenNewChat={openNewGroupModal}
+            onRefreshConversations={fetchConversations}
+          />
+        </div>
+      )}
+
+      {/* Main Right Area - Always Dashboard Portal */}
+      <div className="flex-1 flex flex-col h-full overflow-hidden">
+        <DashboardPortal
+          currentUser={user}
+          onRefreshConversations={fetchConversations}
+          onSelectConversation={setSelectedConversation}
+          onSwitchToChats={() => setIsSidebarOpen(!isSidebarOpen)}
+          onOpenProfile={openProfileModal}
+        />
+      </div>
+
+      {/* Messenger-style Floating Chatbox Popup */}
+      {selectedConversation && (
+        <div className="fixed bottom-4 right-4 w-[365px] h-[490px] bg-background border border-[#ecd8bf] rounded-2xl shadow-2xl flex flex-col z-50 overflow-hidden transition-all duration-300">
           <ChatWindow 
             conversation={selectedConversation} 
             onUpdateLastMessage={(conversationId, message) => {
@@ -225,15 +245,8 @@ export default function Home() {
             onRefreshConversations={fetchConversations}
             onCloseChat={() => setSelectedConversation(null)}
           />
-        ) : (
-          <DashboardPortal
-            currentUser={user}
-            onRefreshConversations={fetchConversations}
-            onSelectConversation={setSelectedConversation}
-            onOpenProfile={openProfileModal}
-          />
-        )}
-      </div>
+        </div>
+      )}
 
       {/* Profile Settings Modal */}
       <Dialog open={isProfileOpen} onOpenChange={setIsProfileOpen}>
