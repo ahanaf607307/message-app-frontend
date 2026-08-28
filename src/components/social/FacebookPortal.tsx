@@ -157,7 +157,7 @@ export default function FacebookPortal({ currentUser, onRefreshConversations, on
               className={`flex-1 h-9 rounded-lg text-xs font-bold gap-2 relative cursor-pointer ${activeSubTab === 'requests' ? 'bg-primary/10 text-primary hover:bg-primary/15' : 'text-muted-foreground hover:bg-muted/40'}`}
               onClick={() => setActiveSubTab('requests')}
             >
-              <UserPlus className="h-4 w-4" /> Friend Requests
+              <UserPlus className="h-4 w-4" /> Connection Requests
               {pendingIncoming.length > 0 && (
                 <Badge className="absolute top-1 right-2 bg-primary text-primary-foreground text-[9px] px-1 h-4 min-w-[16px] flex items-center justify-center rounded-full font-bold">
                   {pendingIncoming.length}
@@ -169,7 +169,7 @@ export default function FacebookPortal({ currentUser, onRefreshConversations, on
               className={`flex-1 h-9 rounded-lg text-xs font-bold gap-2 cursor-pointer ${activeSubTab === 'friends' ? 'bg-primary/10 text-primary hover:bg-primary/15' : 'text-muted-foreground hover:bg-muted/40'}`}
               onClick={() => setActiveSubTab('friends')}
             >
-              <Users className="h-4 w-4" /> Friends List
+              <Users className="h-4 w-4" /> Connected People
             </Button>
           </div>
 
@@ -327,7 +327,7 @@ export default function FacebookPortal({ currentUser, onRefreshConversations, on
             <div className="space-y-4">
               <div className="flex items-center justify-between">
                 <h3 className="text-sm font-bold text-foreground uppercase tracking-wider flex items-center gap-1.5">
-                  <UserPlus className="h-4 w-4 text-primary" /> Friend Requests
+                  <UserPlus className="h-4 w-4 text-primary" /> Connection Requests
                 </h3>
                 <span className="text-xs text-muted-foreground font-semibold">Confirm requests below</span>
               </div>
@@ -352,7 +352,7 @@ export default function FacebookPortal({ currentUser, onRefreshConversations, on
                       <div className="p-3 flex flex-col flex-1 justify-between min-h-[110px] bg-muted/5">
                         <div>
                           <span className="font-extrabold text-xs text-foreground truncate block">{req.sender.name}</span>
-                          <span className="text-[10px] text-muted-foreground font-semibold mt-0.5 block">{req.mutualCount} mutual friends</span>
+                          <span className="text-[10px] text-muted-foreground font-semibold mt-0.5 block">{req.mutualCount} mutual connections</span>
                         </div>
                         <div className="space-y-1.5 mt-4">
                           <Button 
@@ -389,7 +389,7 @@ export default function FacebookPortal({ currentUser, onRefreshConversations, on
                 </div>
               ) : (
                 <div className="text-center py-10 bg-card border border-border/50 rounded-xl">
-                  <p className="text-sm text-muted-foreground">No pending friend requests</p>
+                  <p className="text-sm text-muted-foreground">No pending connection requests</p>
                 </div>
               )}
             </div>
@@ -397,7 +397,7 @@ export default function FacebookPortal({ currentUser, onRefreshConversations, on
             <div className="space-y-4">
               <div className="flex items-center justify-between">
                 <h3 className="text-sm font-bold text-foreground uppercase tracking-wider flex items-center gap-1.5">
-                  <Users className="h-4 w-4 text-primary" /> Active Friends List
+                  <Users className="h-4 w-4 text-primary" /> Connected People
                 </h3>
                 <span className="text-xs text-muted-foreground font-semibold">Connections portal</span>
               </div>
@@ -442,7 +442,7 @@ export default function FacebookPortal({ currentUser, onRefreshConversations, on
                                   alert('Failed to start chat session');
                                 }
                               } else {
-                                alert(`Chatting with mock friend: ${friend.name}`);
+                                alert(`Chatting with mock connection: ${friend.name}`);
                               }
                             }}
                           >
@@ -455,7 +455,7 @@ export default function FacebookPortal({ currentUser, onRefreshConversations, on
                 </div>
               ) : (
                 <div className="text-center py-10 bg-card border border-border/50 rounded-xl">
-                  <p className="text-sm text-muted-foreground">No connected friends found</p>
+                  <p className="text-sm text-muted-foreground">No connected people found</p>
                 </div>
               )}
             </div>
@@ -499,7 +499,7 @@ export default function FacebookPortal({ currentUser, onRefreshConversations, on
         {requestsToRender.slice(0, 1).map(req => (
           <div key={req.id} className="space-y-2.5">
             <div className="flex items-center justify-between">
-              <h5 className="text-[11px] font-bold text-muted-foreground uppercase tracking-wider">Friend requests</h5>
+              <h5 className="text-[11px] font-bold text-muted-foreground uppercase tracking-wider">Connection requests</h5>
               <span className="text-[10px] text-primary font-bold hover:underline cursor-pointer" onClick={() => setActiveSubTab('requests')}>See all</span>
             </div>
             <div className="flex items-start space-x-3 bg-muted/20 p-2.5 rounded-xl border border-border/50">
@@ -512,7 +512,7 @@ export default function FacebookPortal({ currentUser, onRefreshConversations, on
                   <span className="text-[11px] font-black truncate">{req.sender.name}</span>
                   <span className="text-[8px] text-muted-foreground font-semibold flex-shrink-0">1d</span>
                 </div>
-                <span className="text-[9px] text-muted-foreground truncate block">{req.mutualCount} mutual friends</span>
+                <span className="text-[9px] text-muted-foreground truncate block">{req.mutualCount} mutual connections</span>
                 <div className="flex space-x-1.5 mt-2">
                   <Button 
                     size="sm" 

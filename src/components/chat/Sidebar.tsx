@@ -262,7 +262,7 @@ export default function Sidebar({
               { id: 'all', label: 'All' },
               { id: 'unread', label: 'Unread' },
               { id: 'groups', label: 'Groups' },
-              { id: 'direct', label: 'Friends' }
+              { id: 'direct', label: 'Connected' }
             ].map((pill) => (
               <button
                 key={pill.id}
@@ -377,7 +377,7 @@ export default function Sidebar({
                             <div>
                               {status === 'friend' && (
                                 <Badge variant="outline" className="text-[10px] border-green-500/30 text-green-500 bg-green-500/5 flex items-center gap-1">
-                                  <UserCheck className="h-3 w-3" /> Friend
+                                  <UserCheck className="h-3 w-3" /> Connected
                                 </Badge>
                               )}
                               {typeof status === 'object' && status.type === 'sent' && (
@@ -412,12 +412,12 @@ export default function Sidebar({
                 </div>
               )}
 
-              {/* Incoming Requests (Styled in Facebook Friend Request Card Grid Layout) */}
+              {/* Incoming Requests (Styled in Facebook Connection Request Card Grid Layout) */}
               {pendingIncoming.length > 0 && (
                 <div className="space-y-2.5">
                   <div className="flex items-center justify-between px-1">
                     <h5 className="text-[11px] font-bold tracking-wider text-muted-foreground uppercase flex items-center gap-1">
-                      <UserPlus className="h-3 w-3 text-primary animate-pulse" /> Friend Requests
+                      <UserPlus className="h-3 w-3 text-primary animate-pulse" /> Connection Requests
                     </h5>
                     <span className="text-[10px] text-primary font-bold hover:underline cursor-pointer">See all</span>
                   </div>
@@ -460,13 +460,13 @@ export default function Sidebar({
                 </div>
               )}
 
-              {/* Connected Friends List */}
+              {/* Connected People List */}
               <div className="space-y-2">
                 <h5 className="text-[11px] font-bold tracking-wider text-muted-foreground uppercase flex items-center gap-1">
-                  <Users className="h-3 w-3" /> Friends ({friends.length})
+                  <Users className="h-3 w-3" /> Connected People ({friends.length})
                 </h5>
                 {loadingConnections && friends.length === 0 ? (
-                  <p className="text-[11px] text-muted-foreground py-4 text-center">Loading friends list...</p>
+                  <p className="text-[11px] text-muted-foreground py-4 text-center">Loading connections list...</p>
                 ) : friends.length > 0 ? (
                   <div className="space-y-0.5">
                     {friends.map((friend) => (
@@ -503,7 +503,7 @@ export default function Sidebar({
                     ))}
                   </div>
                 ) : (
-                  <p className="text-[11px] text-muted-foreground py-4 text-center">No friends connected yet</p>
+                  <p className="text-[11px] text-muted-foreground py-4 text-center">No connected people yet</p>
                 )}
               </div>
 
