@@ -230,6 +230,7 @@ export default function Home() {
             currentUser={user}
             onRefreshConversations={fetchConversations}
             onSelectConversation={setSelectedConversation}
+            onOpenProfile={openProfileModal}
           />
         )}
       </div>
