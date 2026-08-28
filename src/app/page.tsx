@@ -192,6 +192,30 @@ export default function Home() {
   };
 
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [themeMode, setThemeMode] = useState<'light' | 'dark'>('light');
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const savedTheme = localStorage.getItem('app-theme') as 'light' | 'dark';
+      if (savedTheme === 'dark') {
+        document.documentElement.classList.add('dark');
+        setThemeMode('dark');
+      } else {
+        document.documentElement.classList.remove('dark');
+        setThemeMode('light');
+      }
+    }
+  }, []);
+
+  const handleThemeChange = (theme: 'light' | 'dark') => {
+    localStorage.setItem('app-theme', theme);
+    setThemeMode(theme);
+    if (theme === 'dark') {
+      document.documentElement.classList.add('dark');
+    } else {
+      document.documentElement.classList.remove('dark');
+    }
+  };
 
   if (authLoading || (loading && !conversations.length)) {
     return (
@@ -203,22 +227,32 @@ export default function Home() {
 
   return (
     <main className="flex h-screen overflow-hidden bg-[#faf6f0] text-[#0b4d3a] relative font-sans-active">
-      {/* Left Sidebar Menu Drawer */}
+      {/* Left Sidebar Menu Drawer (Absolute Overlay with Backdrop) */}
       {isSidebarOpen && (
-        <div className="w-85 border-r border-[#ecd8bf]/60 flex-shrink-0 h-full z-20 bg-background shadow-lg transition-all duration-300">
-          <Sidebar 
-            conversations={conversations} 
-            onSelectConversation={setSelectedConversation}
-            selectedId={selectedConversation?.id}
-            onOpenProfile={openProfileModal}
-            onOpenChangePassword={() => {
-              setFormError(null);
-              setIsChangePasswordOpen(true);
-            }}
-            onOpenNewChat={openNewGroupModal}
-            onRefreshConversations={fetchConversations}
+        <>
+          {/* Backdrop overlay */}
+          <div 
+            className="fixed inset-0 bg-black/25 z-20 transition-opacity duration-300"
+            onClick={() => setIsSidebarOpen(false)}
           />
-        </div>
+          <div className="absolute left-0 top-0 w-85 border-r border-[#ecd8bf]/60 h-full z-30 bg-background shadow-2xl transition-all duration-300 flex flex-col">
+            <Sidebar 
+              conversations={conversations} 
+              onSelectConversation={(conv) => {
+                setSelectedConversation(conv);
+                setIsSidebarOpen(false); // Auto close sidebar on chat selection for premium feel
+              }}
+              selectedId={selectedConversation?.id}
+              onOpenProfile={openProfileModal}
+              onOpenChangePassword={() => {
+                setFormError(null);
+                setIsChangePasswordOpen(true);
+              }}
+              onOpenNewChat={openNewGroupModal}
+              onRefreshConversations={fetchConversations}
+            />
+          </div>
+        </>
       )}
 
       {/* Main Right Area - Always Dashboard Portal */}
@@ -317,6 +351,19 @@ export default function Home() {
                 <option value="sans">Geist (Default Sans)</option>
                 <option value="serif">Lora (Classical Serif)</option>
                 <option value="display">Space Grotesk (Modern Display)</option>
+              </select>
+            </div>
+            
+            <div className="space-y-1">
+              <label htmlFor="theme-select" className="text-xs font-semibold text-muted-foreground">Select Theme Mode</label>
+              <select
+                id="theme-select"
+                value={themeMode}
+                onChange={(e) => handleThemeChange(e.target.value as 'light' | 'dark')}
+                className="w-full h-9 rounded-md border border-input bg-background px-3 py-1.5 text-sm ring-offset-background focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+              >
+                <option value="light">☀️ Light Theme</option>
+                <option value="dark">🌙 Dark Theme</option>
               </select>
             </div>
             {formError && <div className="p-3 text-xs text-red-500 bg-red-500/10 border border-red-500/20 rounded-lg">{formError}</div>}

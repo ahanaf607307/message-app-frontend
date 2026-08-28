@@ -274,6 +274,9 @@ export default function ChatWindow({
           <Button variant="ghost" size="icon" className="h-9 w-9" onClick={handleOpenInfo}>
             <Info className="h-4 w-4" />
           </Button>
+          <Button variant="ghost" size="icon" className="h-9 w-9 text-red-500 hover:bg-red-50 dark:hover:bg-red-950/25" onClick={onCloseChat}>
+            <X className="h-4.5 w-4.5" />
+          </Button>
         </div>
       </div>
 
