@@ -3,6 +3,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { Conversation, User } from '@/types';
 import { useAuth } from '@/context/AuthContext';
+import { useTheme } from '@/context/ThemeContext';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Input } from '@/components/ui/input';
@@ -42,6 +43,7 @@ export default function Sidebar({
   onRefreshConversations,
 }: SidebarProps) {
   const { user, logout } = useAuth();
+  const { theme, setTheme } = useTheme();
   const [activeTab, setActiveTab] = useState<'chats' | 'connections'>('chats');
   const [search, setSearch] = useState('');
   const [chatFilter, setChatFilter] = useState<'all' | 'unread' | 'groups' | 'direct'>('all');
@@ -554,6 +556,20 @@ export default function Sidebar({
           </ScrollArea>
         </>
       )}
+      {/* Bottom Theme Toggle Section */}
+      <div className="p-4 border-t border-border bg-background/50 flex items-center justify-between flex-shrink-0">
+        <span className="text-xs font-semibold text-muted-foreground">Select Mode</span>
+        <button
+          onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
+          className="flex items-center justify-center space-x-2 px-3 py-1.5 rounded-lg border border-border bg-background hover:bg-muted text-xs font-bold transition-all shadow-3xs cursor-pointer text-foreground"
+        >
+          {theme === 'dark' ? (
+            <span>🌙 Dark Mode</span>
+          ) : (
+            <span>☀️ Light Mode</span>
+          )}
+        </button>
+      </div>
     </div>
   );
 }

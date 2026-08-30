@@ -3,6 +3,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '@/context/AuthContext';
 import Sidebar from '@/components/chat/Sidebar';
+import { useTheme } from '@/context/ThemeContext';
 import ChatWindow from '@/components/chat/ChatWindow';
 import DashboardPortal from '@/components/social/DashboardPortal';
 import { Conversation, User, Message } from '@/types';
@@ -15,6 +16,7 @@ import { Input } from '@/components/ui/input';
 
 export default function Home() {
   const { user, loading: authLoading, updateProfile, activeFont, changeFont } = useAuth();
+  const { theme: themeMode, setTheme: handleThemeChange } = useTheme();
   const [conversations, setConversations] = useState<Conversation[]>([]);
   const [selectedConversation, setSelectedConversation] = useState<Conversation | null>(null);
   const [loading, setLoading] = useState(true);
@@ -29,6 +31,17 @@ export default function Home() {
   const [profileEmail, setProfileEmail] = useState('');
   const [profileAvatar, setProfileAvatar] = useState<File | null>(null);
   const [profileAvatarPreview, setProfileAvatarPreview] = useState<string>('');
+  const [profileNickname, setProfileNickname] = useState('');
+  const [profileBio, setProfileBio] = useState('');
+  const [profileLivesIn, setProfileLivesIn] = useState('');
+  const [profileFromCity, setProfileFromCity] = useState('');
+  const [profileGender, setProfileGender] = useState('');
+  const [profileWorkplace, setProfileWorkplace] = useState('');
+  const [profileWorkTitle, setProfileWorkTitle] = useState('');
+  const [profileEducationDept, setProfileEducationDept] = useState('');
+  const [profileEducationSchool, setProfileEducationSchool] = useState('');
+  const [profileCover, setProfileCover] = useState<File | null>(null);
+  const [profileCoverPreview, setProfileCoverPreview] = useState<string>('');
   
   const [oldPassword, setOldPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');
@@ -145,6 +158,17 @@ export default function Home() {
       setProfileEmail(user.email);
       setProfileAvatarPreview(user.avatarUrl || '');
       setProfileAvatar(null);
+      setProfileNickname(user.nickname || '');
+      setProfileBio(user.bio || '');
+      setProfileLivesIn(user.livesIn || '');
+      setProfileFromCity(user.fromCity || '');
+      setProfileGender(user.gender || '');
+      setProfileWorkplace(user.workplace || '');
+      setProfileWorkTitle(user.workTitle || '');
+      setProfileEducationDept(user.educationDept || '');
+      setProfileEducationSchool(user.educationSchool || '');
+      setProfileCoverPreview(user.coverUrl || '');
+      setProfileCover(null);
       setFormError(null);
       setIsProfileOpen(true);
     }
@@ -155,7 +179,21 @@ export default function Home() {
     setFormSubmitting(true);
     setFormError(null);
     try {
-      await updateProfile(profileName, profileEmail, profileAvatar);
+      await updateProfile({
+        name: profileName,
+        email: profileEmail,
+        nickname: profileNickname,
+        bio: profileBio,
+        livesIn: profileLivesIn,
+        fromCity: profileFromCity,
+        gender: profileGender,
+        workplace: profileWorkplace,
+        workTitle: profileWorkTitle,
+        educationDept: profileEducationDept,
+        educationSchool: profileEducationSchool,
+        avatarFile: profileAvatar,
+        coverFile: profileCover
+      });
       setIsProfileOpen(false);
       alert('Profile updated successfully!');
     } catch (err: any) {
@@ -192,30 +230,6 @@ export default function Home() {
   };
 
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
-  const [themeMode, setThemeMode] = useState<'light' | 'dark'>('light');
-
-  useEffect(() => {
-    if (typeof window !== 'undefined') {
-      const savedTheme = localStorage.getItem('app-theme') as 'light' | 'dark';
-      if (savedTheme === 'dark') {
-        document.documentElement.classList.add('dark');
-        setThemeMode('dark');
-      } else {
-        document.documentElement.classList.remove('dark');
-        setThemeMode('light');
-      }
-    }
-  }, []);
-
-  const handleThemeChange = (theme: 'light' | 'dark') => {
-    localStorage.setItem('app-theme', theme);
-    setThemeMode(theme);
-    if (theme === 'dark') {
-      document.documentElement.classList.add('dark');
-    } else {
-      document.documentElement.classList.remove('dark');
-    }
-  };
 
   if (authLoading || (loading && !conversations.length)) {
     return (
@@ -284,93 +298,260 @@ export default function Home() {
 
       {/* Profile Settings Modal */}
       <Dialog open={isProfileOpen} onOpenChange={setIsProfileOpen}>
-        <DialogContent className="sm:max-w-md">
-          <DialogHeader>
-            <DialogTitle>Edit Profile</DialogTitle>
-            <DialogDescription>Update your personal information and profile picture.</DialogDescription>
-          </DialogHeader>
-          <form onSubmit={handleUpdateProfile} className="space-y-4">
-            <div className="flex flex-col items-center space-y-2 py-2">
-              <div className="relative w-20 h-20 rounded-full overflow-hidden border border-border bg-muted flex items-center justify-center">
-                {profileAvatarPreview ? (
-                  // eslint-disable-next-line @next/next/no-img-element
-                  <img src={profileAvatarPreview} alt="Avatar Preview" className="w-full h-full object-cover" />
-                ) : (
-                  <span className="text-xl font-bold text-muted-foreground">{profileName.charAt(0)}</span>
-                )}
-              </div>
-              <input
-                id="avatar-upload"
-                type="file"
-                accept="image/*"
-                className="hidden"
-                onChange={(e) => {
-                  const file = e.target.files?.[0];
-                  if (file) {
-                    setProfileAvatar(file);
-                    setProfileAvatarPreview(URL.createObjectURL(file));
-                  }
-                }}
-              />
-              <Button 
-                type="button" 
-                variant="outline" 
-                size="sm"
-                onClick={() => document.getElementById('avatar-upload')?.click()}
-              >
-                Upload Photo
-              </Button>
-            </div>
-            <div className="space-y-1">
-              <label htmlFor="name" className="text-xs font-semibold">Name</label>
-              <Input
-                id="name"
-                value={profileName}
-                onChange={(e) => setProfileName(e.target.value)}
-                required
-              />
-            </div>
-            <div className="space-y-1">
-              <label htmlFor="email" className="text-xs font-semibold">Email Address</label>
-              <Input
-                id="email"
-                type="email"
-                value={profileEmail}
-                onChange={(e) => setProfileEmail(e.target.value)}
-                required
-              />
-            </div>
-            <div className="space-y-1">
-              <label htmlFor="font-select" className="text-xs font-semibold text-muted-foreground">Select System Font</label>
-              <select
-                id="font-select"
-                value={activeFont}
-                onChange={(e) => changeFont(e.target.value as any)}
-                className="w-full h-9 rounded-md border border-input bg-background px-3 py-1.5 text-sm ring-offset-background focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
-              >
-                <option value="sans">Geist (Default Sans)</option>
-                <option value="serif">Lora (Classical Serif)</option>
-                <option value="display">Space Grotesk (Modern Display)</option>
-              </select>
-            </div>
+        <DialogContent className="sm:max-w-2xl max-h-[85vh] overflow-y-auto no-scrollbar rounded-2xl border border-border/80 bg-background shadow-2xl p-0 overflow-hidden">
+          
+          {/* Header Banner */}
+          <div className="bg-linear-to-r from-emerald-600 to-teal-800 dark:from-indigo-950 dark:to-teal-950 p-6 text-white relative">
+            <h2 className="text-xl font-extrabold tracking-tight">Profile Settings</h2>
+            <p className="text-xs text-emerald-100 dark:text-muted-foreground mt-1">Customize your social identity card, workplace details, and preferences.</p>
+          </div>
+
+          <form onSubmit={handleUpdateProfile} className="space-y-6 p-6">
             
-            <div className="space-y-1">
-              <label htmlFor="theme-select" className="text-xs font-semibold text-muted-foreground">Select Theme Mode</label>
-              <select
-                id="theme-select"
-                value={themeMode}
-                onChange={(e) => handleThemeChange(e.target.value as 'light' | 'dark')}
-                className="w-full h-9 rounded-md border border-input bg-background px-3 py-1.5 text-sm ring-offset-background focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
-              >
-                <option value="light">☀️ Light Theme</option>
-                <option value="dark">🌙 Dark Theme</option>
-              </select>
+            {/* 1. Visual Media Section */}
+            <div className="bg-muted/15 dark:bg-card/30 border border-border/50 rounded-2xl p-4.5 space-y-4">
+              <div className="flex items-center space-x-2 text-[#0b4d3a] dark:text-foreground">
+                <span className="text-lg">🖼️</span>
+                <h3 className="text-xs font-black uppercase tracking-wider">Profile & Cover Media</h3>
+              </div>
+              
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {/* Avatar upload */}
+                <div className="flex flex-col items-center justify-center p-4 bg-background dark:bg-card border border-dashed border-border rounded-xl space-y-3 relative group">
+                  <div className="relative w-20 h-20 rounded-full overflow-hidden border-2 border-[#ecd8bf] dark:border-border bg-muted flex items-center justify-center shadow-sm">
+                    {profileAvatarPreview ? (
+                      <img src={profileAvatarPreview} alt="Avatar Preview" className="w-full h-full object-cover" />
+                    ) : (
+                      <span className="text-2xl font-black text-muted-foreground">{profileName?.charAt(0)}</span>
+                    )}
+                  </div>
+                  <input
+                    id="avatar-upload"
+                    type="file"
+                    accept="image/*"
+                    className="hidden"
+                    onChange={(e) => {
+                      const file = e.target.files?.[0];
+                      if (file) {
+                        setProfileAvatar(file);
+                        setProfileAvatarPreview(URL.createObjectURL(file));
+                      }
+                    }}
+                  />
+                  <Button 
+                    type="button" 
+                    variant="outline" 
+                    size="sm"
+                    className="h-8 text-xs font-bold border-border hover:bg-muted cursor-pointer shadow-3xs"
+                    onClick={() => document.getElementById('avatar-upload')?.click()}
+                  >
+                    Change Avatar
+                  </Button>
+                </div>
+
+                {/* Cover upload */}
+                <div className="flex flex-col items-center justify-center p-4 bg-background dark:bg-card border border-dashed border-border rounded-xl space-y-3 relative group">
+                  <div className="relative w-full h-20 rounded-lg overflow-hidden border border-border bg-muted flex items-center justify-center shadow-xs">
+                    {profileCoverPreview ? (
+                      <img src={profileCoverPreview} alt="Cover Preview" className="w-full h-full object-cover" />
+                    ) : (
+                      <span className="text-xs text-muted-foreground italic font-semibold">No cover photo set</span>
+                    )}
+                  </div>
+                  <input
+                    id="cover-upload"
+                    type="file"
+                    accept="image/*"
+                    className="hidden"
+                    onChange={(e) => {
+                      const file = e.target.files?.[0];
+                      if (file) {
+                        setProfileCover(file);
+                        setProfileCoverPreview(URL.createObjectURL(file));
+                      }
+                    }}
+                  />
+                  <Button 
+                    type="button" 
+                    variant="outline" 
+                    size="sm"
+                    className="h-8 text-xs font-bold border-border hover:bg-muted cursor-pointer shadow-3xs"
+                    onClick={() => document.getElementById('cover-upload')?.click()}
+                  >
+                    Change Cover
+                  </Button>
+                </div>
+              </div>
             </div>
+
+            {/* 2. Profile Identity Section */}
+            <div className="bg-muted/15 dark:bg-card/30 border border-border/50 rounded-2xl p-4.5 space-y-4">
+              <div className="flex items-center space-x-2 text-[#0b4d3a] dark:text-foreground">
+                <span className="text-lg">👤</span>
+                <h3 className="text-xs font-black uppercase tracking-wider">Identity & Bio</h3>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="space-y-1.5">
+                  <label htmlFor="name" className="text-xs font-bold">Full Name</label>
+                  <Input
+                    id="name"
+                    placeholder="e.g. User One"
+                    value={profileName}
+                    onChange={(e) => setProfileName(e.target.value)}
+                    className="h-9.5 rounded-lg border-border bg-background"
+                    required
+                  />
+                </div>
+                <div className="space-y-1.5">
+                  <label htmlFor="nickname" className="text-xs font-bold">Nickname (optional)</label>
+                  <Input
+                    id="nickname"
+                    placeholder="e.g. MasterMind"
+                    value={profileNickname}
+                    onChange={(e) => setProfileNickname(e.target.value)}
+                    className="h-9.5 rounded-lg border-border bg-background"
+                  />
+                </div>
+              </div>
+              <div className="space-y-1.5">
+                <label htmlFor="bio" className="text-xs font-bold">Bio Status Quote</label>
+                <textarea
+                  id="bio"
+                  rows={2}
+                  placeholder="Tell people about yourself..."
+                  className="w-full rounded-lg border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 resize-none"
+                  value={profileBio}
+                  onChange={(e) => setProfileBio(e.target.value)}
+                />
+              </div>
+            </div>
+
+            {/* 3. Location & Details Section */}
+            <div className="bg-muted/15 dark:bg-card/30 border border-border/50 rounded-2xl p-4.5 space-y-4">
+              <div className="flex items-center space-x-2 text-[#0b4d3a] dark:text-foreground">
+                <span className="text-lg">📍</span>
+                <h3 className="text-xs font-black uppercase tracking-wider">Personal details</h3>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div className="space-y-1.5">
+                  <label htmlFor="livesIn" className="text-xs font-bold">Current City</label>
+                  <Input
+                    id="livesIn"
+                    placeholder="e.g. Dhaka, Bangladesh"
+                    value={profileLivesIn}
+                    onChange={(e) => setProfileLivesIn(e.target.value)}
+                    className="h-9.5 rounded-lg border-border bg-background"
+                  />
+                </div>
+                <div className="space-y-1.5">
+                  <label htmlFor="fromCity" className="text-xs font-bold">Hometown</label>
+                  <Input
+                    id="fromCity"
+                    placeholder="e.g. Rangpur City"
+                    value={profileFromCity}
+                    onChange={(e) => setProfileFromCity(e.target.value)}
+                    className="h-9.5 rounded-lg border-border bg-background"
+                  />
+                </div>
+                <div className="space-y-1.5">
+                  <label htmlFor="gender" className="text-xs font-bold">Gender</label>
+                  <Input
+                    id="gender"
+                    placeholder="e.g. Male"
+                    value={profileGender}
+                    onChange={(e) => setProfileGender(e.target.value)}
+                    className="h-9.5 rounded-lg border-border bg-background"
+                  />
+                </div>
+              </div>
+            </div>
+
+            {/* 4. Work & Education Section */}
+            <div className="bg-muted/15 dark:bg-card/30 border border-border/50 rounded-2xl p-4.5 space-y-4">
+              <div className="flex items-center space-x-2 text-[#0b4d3a] dark:text-foreground">
+                <span className="text-lg">💼</span>
+                <h3 className="text-xs font-black uppercase tracking-wider">Work & Education</h3>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="space-y-1.5">
+                  <label htmlFor="workplace" className="text-xs font-bold">Workplace Company</label>
+                  <Input
+                    id="workplace"
+                    placeholder="e.g. Join Venture AI"
+                    value={profileWorkplace}
+                    onChange={(e) => setProfileWorkplace(e.target.value)}
+                    className="h-9.5 rounded-lg border-border bg-background"
+                  />
+                </div>
+                <div className="space-y-1.5">
+                  <label htmlFor="workTitle" className="text-xs font-bold">Job Title / Specialty</label>
+                  <Input
+                    id="workTitle"
+                    placeholder="e.g. Wordpress Theme & Plugin Developer"
+                    value={profileWorkTitle}
+                    onChange={(e) => setProfileWorkTitle(e.target.value)}
+                    className="h-9.5 rounded-lg border-border bg-background"
+                  />
+                </div>
+                <div className="space-y-1.5">
+                  <label htmlFor="educationSchool" className="text-xs font-bold">School / University</label>
+                  <Input
+                    id="educationSchool"
+                    placeholder="e.g. Canadian University of Bangladesh"
+                    value={profileEducationSchool}
+                    onChange={(e) => setProfileEducationSchool(e.target.value)}
+                    className="h-9.5 rounded-lg border-border bg-background"
+                  />
+                </div>
+                <div className="space-y-1.5">
+                  <label htmlFor="educationDept" className="text-xs font-bold">Department / Major</label>
+                  <Input
+                    id="educationDept"
+                    placeholder="e.g. Department of CSE"
+                    value={profileEducationDept}
+                    onChange={(e) => setProfileEducationDept(e.target.value)}
+                    className="h-9.5 rounded-lg border-border bg-background"
+                  />
+                </div>
+              </div>
+            </div>
+
+            {/* 5. Account Settings (System preference) */}
+            <div className="bg-muted/15 dark:bg-card/30 border border-border/50 rounded-2xl p-4.5 space-y-4">
+              <div className="flex items-center space-x-2 text-[#0b4d3a] dark:text-foreground">
+                <span className="text-lg">⚙️</span>
+                <h3 className="text-xs font-black uppercase tracking-wider">System Preferences</h3>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="space-y-1.5">
+                  <label htmlFor="font-select" className="text-xs font-bold">System Font</label>
+                  <select
+                    id="font-select"
+                    value={activeFont}
+                    onChange={(e) => changeFont(e.target.value as any)}
+                    className="w-full h-9.5 rounded-lg border border-input bg-background px-3 py-1.5 text-sm ring-offset-background focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 cursor-pointer font-semibold"
+                  >
+                    <option value="sans">Geist (Default Sans)</option>
+                    <option value="serif">Lora (Classical Serif)</option>
+                    <option value="display">Space Grotesk (Modern Display)</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+
             {formError && <div className="p-3 text-xs text-red-500 bg-red-500/10 border border-red-500/20 rounded-lg">{formError}</div>}
-            <DialogFooter>
-              <Button type="submit" disabled={formSubmitting}>
+            
+            <DialogFooter className="pt-4 border-t border-border flex items-center justify-between gap-3 bg-muted/5 p-4 -mx-6 -mb-6">
+              <Button type="button" variant="outline" className="cursor-pointer font-bold border-border shadow-3xs" onClick={() => setIsProfileOpen(false)}>
+                Cancel
+              </Button>
+              <Button type="submit" disabled={formSubmitting} className="cursor-pointer font-bold bg-[#0b4d3a] hover:bg-[#08362b] text-white shadow-3xs px-6">
                 {formSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                Save Changes
+                Save All Changes
               </Button>
             </DialogFooter>
           </form>

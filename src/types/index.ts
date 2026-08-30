@@ -10,6 +10,16 @@ export interface User {
   createdAt: string;
   updatedAt: string;
   connectionId?: string;
+  nickname?: string;
+  bio?: string;
+  coverUrl?: string;
+  livesIn?: string;
+  fromCity?: string;
+  gender?: string;
+  workplace?: string;
+  workTitle?: string;
+  educationDept?: string;
+  educationSchool?: string;
 }
 
 export interface Conversation {

@@ -7,7 +7,7 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { Loader2, Send, Phone, Video, Info, Trash2, Edit2, Check, X, UserPlus, LogOut } from 'lucide-react';
+import { Loader2, Send, Phone, Info, Trash2, Edit2, Check, X, UserPlus, LogOut, Image as ImageIcon } from 'lucide-react';
 import api from '@/lib/api';
 import { getSocket } from '@/lib/socket';
 import { format } from 'date-fns';
@@ -248,9 +248,9 @@ export default function ChatWindow({
   const displayName = conversation.name || otherParticipant?.user.name || 'Unknown';
 
   return (
-    <div className="flex flex-col h-full bg-background border-l border-border relative">
+    <div className="flex flex-col h-full bg-background border-l border-border relative overflow-hidden">
       {/* Header */}
-      <div className="p-4 border-b border-border flex items-center justify-between bg-card/50 backdrop-blur-xs">
+      <div className="p-4 border-b border-border flex items-center justify-between bg-card/50 backdrop-blur-xs flex-shrink-0">
         <div className="flex items-center space-x-3 min-w-0">
           <Avatar className="h-10 w-10 border border-border shadow-xs">
             <AvatarImage src={otherParticipant?.user.avatarUrl} />
@@ -267,9 +267,6 @@ export default function ChatWindow({
         <div className="flex items-center space-x-0.5">
           <Button variant="ghost" size="icon" className="h-9 w-9">
             <Phone className="h-4 w-4" />
-          </Button>
-          <Button variant="ghost" size="icon" className="h-9 w-9">
-            <Video className="h-4 w-4" />
           </Button>
           <Button variant="ghost" size="icon" className="h-9 w-9" onClick={handleOpenInfo}>
             <Info className="h-4 w-4" />
@@ -342,7 +339,13 @@ export default function ChatWindow({
                               ? 'bg-primary text-primary-foreground rounded-tr-none' 
                               : 'bg-card border text-foreground rounded-tl-none'
                           }`}>
-                            {msg.content}
+                            {typeof msg.content === 'string' && (msg.content.match(/\.(jpeg|jpg|gif|png|webp|svg)/i) !== null || msg.content.includes('res.cloudinary.com')) ? (
+                              <div className="rounded-lg overflow-hidden max-w-[320px] bg-muted/20">
+                                <img src={msg.content} alt="Shared Photo" className="w-full h-auto object-cover max-h-[240px] hover:scale-102 transition-transform duration-200 cursor-pointer" onClick={() => window.open(msg.content, '_blank')} />
+                              </div>
+                            ) : (
+                              msg.content
+                            )}
                           </div>
                         )}
                       </div>
@@ -382,6 +385,36 @@ export default function ChatWindow({
       {/* Footer / Input */}
       <div className="p-4 bg-background border-t border-border">
         <form onSubmit={handleSendMessage} className="flex items-center space-x-2">
+          <label className="h-10 w-10 flex items-center justify-center rounded-lg hover:bg-muted border border-border cursor-pointer flex-shrink-0 transition-colors shadow-2xs">
+            <ImageIcon className="h-5 w-5 text-muted-foreground" />
+            <input 
+              type="file" 
+              accept="image/*" 
+              className="hidden" 
+              onChange={async (e) => {
+                const file = e.target.files?.[0];
+                if (!file) return;
+                try {
+                  const formData = new FormData();
+                  formData.append('file', file);
+                  const res = await api.post('/upload', formData, {
+                    headers: { 'Content-Type': 'multipart/form-data' }
+                  });
+                  if (res.data.success && socket) {
+                    const messageData = {
+                      conversationId: conversation.id,
+                      senderId: user?.id,
+                      content: res.data.url,
+                    };
+                    socket.emit('message:send', messageData);
+                  }
+                } catch (err) {
+                  alert('Failed to upload image. Please verify your Cloudinary configurations.');
+                }
+              }}
+            />
+          </label>
+
           <Input 
             placeholder="Type a message..." 
             className="flex-1 bg-muted/40 border-transparent focus-visible:ring-primary/50 text-sm h-10"

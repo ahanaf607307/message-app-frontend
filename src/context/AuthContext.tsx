@@ -13,7 +13,21 @@ interface AuthContextType {
   login: (token: string, user: User) => void;
   logout: () => void;
   updateUser: (user: User) => void;
-  updateProfile: (name: string, email: string, avatarFile?: File | null) => Promise<User>;
+  updateProfile: (profileData: {
+    name: string;
+    email: string;
+    nickname?: string;
+    bio?: string;
+    livesIn?: string;
+    fromCity?: string;
+    gender?: string;
+    workplace?: string;
+    workTitle?: string;
+    educationDept?: string;
+    educationSchool?: string;
+    avatarFile?: File | null;
+    coverFile?: File | null;
+  }) => Promise<User>;
   activeFont: 'sans' | 'serif' | 'display';
   changeFont: (newFont: 'sans' | 'serif' | 'display') => void;
 }
@@ -129,12 +143,39 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setUser(newUser);
   };
 
-  const updateProfile = async (name: string, email: string, avatarFile?: File | null) => {
+  const updateProfile = async (profileData: {
+    name: string;
+    email: string;
+    nickname?: string;
+    bio?: string;
+    livesIn?: string;
+    fromCity?: string;
+    gender?: string;
+    workplace?: string;
+    workTitle?: string;
+    educationDept?: string;
+    educationSchool?: string;
+    avatarFile?: File | null;
+    coverFile?: File | null;
+  }) => {
     const formData = new FormData();
-    formData.append('name', name);
-    formData.append('email', email);
-    if (avatarFile) {
-      formData.append('avatar', avatarFile);
+    formData.append('name', profileData.name);
+    formData.append('email', profileData.email);
+    if (profileData.nickname !== undefined) formData.append('nickname', profileData.nickname);
+    if (profileData.bio !== undefined) formData.append('bio', profileData.bio);
+    if (profileData.livesIn !== undefined) formData.append('livesIn', profileData.livesIn);
+    if (profileData.fromCity !== undefined) formData.append('fromCity', profileData.fromCity);
+    if (profileData.gender !== undefined) formData.append('gender', profileData.gender);
+    if (profileData.workplace !== undefined) formData.append('workplace', profileData.workplace);
+    if (profileData.workTitle !== undefined) formData.append('workTitle', profileData.workTitle);
+    if (profileData.educationDept !== undefined) formData.append('educationDept', profileData.educationDept);
+    if (profileData.educationSchool !== undefined) formData.append('educationSchool', profileData.educationSchool);
+    
+    if (profileData.avatarFile) {
+      formData.append('avatar', profileData.avatarFile);
+    }
+    if (profileData.coverFile) {
+      formData.append('cover', profileData.coverFile);
     }
 
     const response = await api.patch('/user/update-profile', formData, {

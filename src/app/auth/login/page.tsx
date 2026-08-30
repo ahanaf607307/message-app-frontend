@@ -77,7 +77,7 @@ export default function LoginPage() {
             <MessageCircle className="h-6 w-6" />
           </div>
           <span className="text-2xl font-black tracking-tight bg-linear-to-r from-primary to-amber-300 bg-clip-text text-transparent">
-            MessageApp
+            Your Chat
           </span>
         </div>
 
@@ -125,7 +125,7 @@ export default function LoginPage() {
 
         {/* Footer info */}
         <div className="text-xs text-muted-foreground z-10 flex items-center gap-1.5">
-          <span>© 2026 MessageApp Inc. All rights reserved.</span>
+          <span>© 2026 Your Chat Inc by Ahanaf Mubasshir. All rights reserved.</span>
         </div>
       </div>
 
@@ -141,7 +141,7 @@ export default function LoginPage() {
               <div className="h-8 w-8 rounded-lg bg-primary flex items-center justify-center text-primary-foreground">
                 <MessageCircle className="h-5 w-5" />
               </div>
-              <span className="text-lg font-black tracking-tight text-foreground">MessageApp</span>
+              <span className="text-lg font-black tracking-tight text-foreground">Your Chat</span>
             </div>
             <CardTitle className="text-3xl font-extrabold text-center bg-linear-to-r from-primary to-amber-400 bg-clip-text text-transparent">
               Sign In
@@ -191,10 +191,10 @@ export default function LoginPage() {
               <div className="flex-grow border-t border-border"></div>
             </div>
 
-            <Button 
-              variant="outline" 
-              type="button" 
-              className="w-full bg-muted/20 border-border/50 hover:bg-muted/40 font-semibold h-10" 
+            <Button
+              variant="outline"
+              type="button"
+              className="w-full bg-muted/20 border-border/50 hover:bg-muted/40 font-semibold h-10"
               onClick={handleGoogleLogin}
               disabled={isLoading || isGoogleLoading}
             >
@@ -210,7 +210,7 @@ export default function LoginPage() {
           </CardContent>
           <CardFooter className="flex flex-col space-y-2">
             <div className="text-sm text-center text-muted-foreground">
-              New to MessageApp?{' '}
+              New to Your Chat?{' '}
               <Link href="/auth/register" className="text-primary hover:underline font-bold">
                 Create an account
               </Link>
