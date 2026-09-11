@@ -41,9 +41,12 @@ export default function ChatWindow({
   const [friendsList, setFriendsList] = useState<User[]>([]);
   const [addMemberId, setAddMemberId] = useState('');
   const [infoLoading, setInfoLoading] = useState(false);
+  const [isOnline, setIsOnline] = useState(false);
 
   const scrollRef = useRef<HTMLDivElement>(null);
   const socket = getSocket();
+  const otherParticipant = conversation.participants.find(p => p.user.id !== user?.id);
+  const displayName = conversation.name || otherParticipant?.user.name || 'Unknown';
 
   useEffect(() => {
     const fetchMessages = async () => {
@@ -101,18 +104,47 @@ export default function ChatWindow({
         }
       };
 
+      const handleUserStatus = (data: { userId: string; isOnline: boolean }) => {
+        if (otherParticipant && data.userId === otherParticipant.user.id) {
+          setIsOnline(data.isOnline);
+        }
+      };
+
+      const handleUserOnline = (data: { userId: string }) => {
+        if (otherParticipant && data.userId === otherParticipant.user.id) {
+          setIsOnline(true);
+        }
+      };
+
+      const handleUserOffline = (data: { userId: string }) => {
+        if (otherParticipant && data.userId === otherParticipant.user.id) {
+          setIsOnline(false);
+        }
+      };
+
       socket.on('message:received', handleNewMessage);
       socket.on('typing:active', handleTyping);
       socket.on('message:seen', handleMessageSeen);
+      socket.on('user:status', handleUserStatus);
+      socket.on('user:online', handleUserOnline);
+      socket.on('user:offline', handleUserOffline);
+
+      // Request initial status
+      if (otherParticipant) {
+        socket.emit('user:get-status', { targetUserId: otherParticipant.user.id });
+      }
 
       return () => {
         socket.emit('conversation:leave', conversation.id);
         socket.off('message:received', handleNewMessage);
         socket.off('typing:active', handleTyping);
         socket.off('message:seen', handleMessageSeen);
+        socket.off('user:status', handleUserStatus);
+        socket.off('user:online', handleUserOnline);
+        socket.off('user:offline', handleUserOffline);
       };
     }
-  }, [conversation.id, user?.id, socket, onUpdateLastMessage]);
+  }, [conversation.id, user?.id, socket, onUpdateLastMessage, otherParticipant]);
 
   useEffect(() => {
     if (scrollRef.current) {
@@ -244,11 +276,10 @@ export default function ChatWindow({
     }
   };
 
-  const otherParticipant = conversation.participants.find(p => p.user.id !== user?.id);
-  const displayName = conversation.name || otherParticipant?.user.name || 'Unknown';
+
 
   return (
-    <div className="flex flex-col h-full bg-background border-l border-border relative overflow-hidden">
+    <div className="flex flex-col h-full bg-background relative overflow-hidden">
       {/* Header */}
       <div className="p-4 border-b border-border flex items-center justify-between bg-card/50 backdrop-blur-xs flex-shrink-0">
         <div className="flex items-center space-x-3 min-w-0">
@@ -258,10 +289,18 @@ export default function ChatWindow({
           </Avatar>
           <div className="min-w-0">
             <h3 className="font-semibold text-sm leading-none mb-1 truncate">{displayName}</h3>
-            <div className="flex items-center gap-1.5">
-              <span className="w-1.5 h-1.5 rounded-full bg-green-500"></span>
-              <span className="text-[11px] text-muted-foreground font-medium">Online</span>
-            </div>
+            {conversation.isGroupChat ? (
+              <span className="text-[11px] text-muted-foreground font-medium">
+                {conversation.participants.length} members
+              </span>
+            ) : (
+              <div className="flex items-center gap-1.5">
+                <span className={`w-1.5 h-1.5 rounded-full ${isOnline ? 'bg-green-500 animate-pulse' : 'bg-muted-foreground/50'}`}></span>
+                <span className="text-[11px] text-muted-foreground font-medium">
+                  {isOnline ? 'Active now' : 'Offline'}
+                </span>
+              </div>
+            )}
           </div>
         </div>
         <div className="flex items-center space-x-0.5">
@@ -271,14 +310,20 @@ export default function ChatWindow({
           <Button variant="ghost" size="icon" className="h-9 w-9" onClick={handleOpenInfo}>
             <Info className="h-4 w-4" />
           </Button>
-          <Button variant="ghost" size="icon" className="h-9 w-9 text-red-500 hover:bg-red-50 dark:hover:bg-red-950/25" onClick={onCloseChat}>
+          <Button 
+            variant="ghost" 
+            size="icon" 
+            className="h-8 w-8 rounded-full text-muted-foreground hover:text-foreground hover:bg-muted cursor-pointer transition-colors" 
+            onClick={onCloseChat}
+            title="Close chat"
+          >
             <X className="h-4.5 w-4.5" />
           </Button>
         </div>
       </div>
 
       {/* Messages */}
-      <ScrollArea className="flex-1 p-4 bg-muted/5">
+      <div className="flex-1 p-4 overflow-y-auto bg-muted/5 scroll-smooth">
         {loading ? (
           <div className="flex items-center justify-center h-full">
             <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
@@ -292,11 +337,11 @@ export default function ChatWindow({
               return (
                 <div key={msg.id || index} className={`flex ${isMe ? 'justify-end' : 'justify-start'}`}>
                   <div className={`flex items-start gap-2 max-w-[70%] ${isMe ? 'flex-row-reverse' : 'flex-row'}`}>
-                    {/* Participant Avatar for group chat */}
-                    {conversation.isGroupChat && !isMe && (
+                    {/* Participant Avatar for incoming messages */}
+                    {!isMe && (
                       <Avatar className="h-7 w-7 border mt-0.5 border-border/50">
-                        <AvatarImage src={msg.sender?.avatarUrl} />
-                        <AvatarFallback className="text-[10px] bg-muted">{msg.sender?.name?.charAt(0)}</AvatarFallback>
+                        <AvatarImage src={msg.sender?.avatarUrl || otherParticipant?.user.avatarUrl} />
+                        <AvatarFallback className="text-[10px] bg-muted">{(msg.sender?.name || displayName).charAt(0)}</AvatarFallback>
                       </Avatar>
                     )}
 
@@ -334,7 +379,7 @@ export default function ChatWindow({
                             </Button>
                           </div>
                         ) : (
-                          <div className={`px-4 py-2.5 rounded-2xl text-sm shadow-2xs leading-relaxed ${
+                          <div className={`px-4 py-2.5 rounded-2xl text-sm shadow-2xs leading-relaxed break-words ${
                             isMe 
                               ? 'bg-primary text-primary-foreground rounded-tr-none' 
                               : 'bg-card border text-foreground rounded-tl-none'
@@ -380,7 +425,7 @@ export default function ChatWindow({
             <div ref={scrollRef} />
           </div>
         )}
-      </ScrollArea>
+      </div>
 
       {/* Footer / Input */}
       <div className="p-4 bg-background border-t border-border">
@@ -408,8 +453,9 @@ export default function ChatWindow({
                     };
                     socket.emit('message:send', messageData);
                   }
-                } catch (err) {
-                  alert('Failed to upload image. Please verify your Cloudinary configurations.');
+                } catch (err: any) {
+                  const errMsg = err.response?.data?.message || err.message || 'Failed to upload image';
+                  alert(`Upload Error: ${errMsg}. Please verify your Cloudinary configurations.`);
                 }
               }}
             />

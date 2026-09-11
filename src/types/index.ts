@@ -20,6 +20,41 @@ export interface User {
   workTitle?: string;
   educationDept?: string;
   educationSchool?: string;
+  isLocked?: boolean;
+}
+
+export interface PostComment {
+  id: string;
+  postId: string;
+  userId: string;
+  content: string;
+  createdAt: string;
+  user: {
+    id: string;
+    name: string;
+    avatarUrl?: string;
+  };
+}
+
+export interface Post {
+  id: string;
+  content: string;
+  mediaUrl?: string | null;
+  audience?: 'PUBLIC' | 'CONNECTIONS' | 'ONLY_ME';
+  postType?: 'REGULAR' | 'PROFILE_PICTURE' | 'COVER_PHOTO';
+  createdAt: string;
+  updatedAt: string;
+  author: {
+    id: string;
+    name: string;
+    email: string;
+    avatarUrl?: string;
+    isLocked?: boolean;
+  };
+  likesCount: number;
+  commentsCount: number;
+  comments: PostComment[];
+  userLiked: boolean;
 }
 
 export interface Conversation {

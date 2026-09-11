@@ -25,6 +25,7 @@ interface AuthContextType {
     workTitle?: string;
     educationDept?: string;
     educationSchool?: string;
+    isLocked?: boolean;
     avatarFile?: File | null;
     coverFile?: File | null;
   }) => Promise<User>;
@@ -155,6 +156,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     workTitle?: string;
     educationDept?: string;
     educationSchool?: string;
+    isLocked?: boolean;
     avatarFile?: File | null;
     coverFile?: File | null;
   }) => {
@@ -170,6 +172,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     if (profileData.workTitle !== undefined) formData.append('workTitle', profileData.workTitle);
     if (profileData.educationDept !== undefined) formData.append('educationDept', profileData.educationDept);
     if (profileData.educationSchool !== undefined) formData.append('educationSchool', profileData.educationSchool);
+    if (profileData.isLocked !== undefined) formData.append('isLocked', String(profileData.isLocked));
     
     if (profileData.avatarFile) {
       formData.append('avatar', profileData.avatarFile);

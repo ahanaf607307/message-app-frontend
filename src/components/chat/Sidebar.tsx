@@ -13,6 +13,7 @@ import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import {
   DropdownMenu,
   DropdownMenuContent,
+  DropdownMenuGroup,
   DropdownMenuItem,
   DropdownMenuLabel,
   DropdownMenuSeparator,
@@ -195,32 +196,34 @@ export default function Sidebar({
               <MoreVertical className="h-4 w-4" />
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-48">
-              <DropdownMenuLabel>My Account</DropdownMenuLabel>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem onClick={onOpenProfile}>
-                <Settings className="mr-2 h-4 w-4" />
-                Profile Settings
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={onOpenChangePassword}>
-                <Settings className="mr-2 h-4 w-4" />
-                Change Password
-              </DropdownMenuItem>
-              {user?.role === 'SYSTEM_OWNER' && (
-                <>
-                  <DropdownMenuSeparator />
-                  <DropdownMenuItem className="text-primary focus:bg-primary/5">
-                    <ShieldCheck className="mr-2 h-4 w-4" />
-                    <Link href="/admin" className="flex items-center justify-between w-full">
-                      Admin Panel <ExternalLink className="h-3.5 w-3.5" />
-                    </Link>
-                  </DropdownMenuItem>
-                </>
-              )}
-              <DropdownMenuSeparator />
-              <DropdownMenuItem onClick={logout} className="text-red-500 focus:bg-red-50 dark:focus:bg-red-950/20">
-                <LogOut className="mr-2 h-4 w-4" />
-                Logout
-              </DropdownMenuItem>
+              <DropdownMenuGroup>
+                <DropdownMenuLabel>My Account</DropdownMenuLabel>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem onClick={onOpenProfile}>
+                  <Settings className="mr-2 h-4 w-4" />
+                  Profile Settings
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={onOpenChangePassword}>
+                  <Settings className="mr-2 h-4 w-4" />
+                  Change Password
+                </DropdownMenuItem>
+                {user?.role === 'SYSTEM_OWNER' && (
+                  <>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem className="text-primary focus:bg-primary/5">
+                      <ShieldCheck className="mr-2 h-4 w-4" />
+                      <Link href="/admin" className="flex items-center justify-between w-full">
+                        Admin Panel <ExternalLink className="h-3.5 w-3.5" />
+                      </Link>
+                    </DropdownMenuItem>
+                  </>
+                )}
+                <DropdownMenuSeparator />
+                <DropdownMenuItem onClick={logout} className="text-red-500 focus:bg-red-50 dark:focus:bg-red-950/20">
+                  <LogOut className="mr-2 h-4 w-4" />
+                  Logout
+                </DropdownMenuItem>
+              </DropdownMenuGroup>
             </DropdownMenuContent>
           </DropdownMenu>
         </div>
@@ -303,7 +306,7 @@ export default function Sidebar({
                             {getConversationName(conv).charAt(0)}
                           </AvatarFallback>
                         </Avatar>
-                        <div className="absolute bottom-0 right-0 w-3 h-3 bg-green-500 border-2 border-background rounded-full"></div>
+
                       </div>
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center justify-between mb-0.5">

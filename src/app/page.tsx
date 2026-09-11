@@ -42,6 +42,7 @@ export default function Home() {
   const [profileEducationSchool, setProfileEducationSchool] = useState('');
   const [profileCover, setProfileCover] = useState<File | null>(null);
   const [profileCoverPreview, setProfileCoverPreview] = useState<string>('');
+  const [profileIsLocked, setProfileIsLocked] = useState(false);
   
   const [oldPassword, setOldPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');
@@ -169,6 +170,7 @@ export default function Home() {
       setProfileEducationSchool(user.educationSchool || '');
       setProfileCoverPreview(user.coverUrl || '');
       setProfileCover(null);
+      setProfileIsLocked(user.isLocked || false);
       setFormError(null);
       setIsProfileOpen(true);
     }
@@ -191,6 +193,7 @@ export default function Home() {
         workTitle: profileWorkTitle,
         educationDept: profileEducationDept,
         educationSchool: profileEducationSchool,
+        isLocked: profileIsLocked,
         avatarFile: profileAvatar,
         coverFile: profileCover
       });
@@ -282,7 +285,7 @@ export default function Home() {
 
       {/* Messenger-style Floating Chatbox Popup */}
       {selectedConversation && (
-        <div className="fixed bottom-4 right-4 w-[365px] h-[490px] bg-background border border-[#ecd8bf] rounded-2xl shadow-2xl flex flex-col z-50 overflow-hidden transition-all duration-300">
+        <div className="fixed bottom-4 right-4 w-[365px] h-[490px] bg-background border border-[#ecd8bf] dark:border-border/80 rounded-2xl shadow-2xl flex flex-col z-50 overflow-hidden transition-all duration-300">
           <ChatWindow 
             conversation={selectedConversation} 
             onUpdateLastMessage={(conversationId, message) => {
@@ -298,7 +301,7 @@ export default function Home() {
 
       {/* Profile Settings Modal */}
       <Dialog open={isProfileOpen} onOpenChange={setIsProfileOpen}>
-        <DialogContent className="sm:max-w-2xl max-h-[85vh] overflow-y-auto no-scrollbar rounded-2xl border border-border/80 bg-background shadow-2xl p-0 overflow-hidden">
+        <DialogContent className="sm:max-w-2xl max-h-[85vh] overflow-y-auto no-scrollbar rounded-2xl border border-border/80 bg-background shadow-2xl p-0">
           
           {/* Header Banner */}
           <div className="bg-linear-to-r from-emerald-600 to-teal-800 dark:from-indigo-950 dark:to-teal-950 p-6 text-white relative">
@@ -519,11 +522,27 @@ export default function Home() {
               </div>
             </div>
 
-            {/* 5. Account Settings (System preference) */}
+            {/* 5. Account Settings (System preference & Profile Lock) */}
             <div className="bg-muted/15 dark:bg-card/30 border border-border/50 rounded-2xl p-4.5 space-y-4">
               <div className="flex items-center space-x-2 text-[#0b4d3a] dark:text-foreground">
-                <span className="text-lg">⚙️</span>
-                <h3 className="text-xs font-black uppercase tracking-wider">System Preferences</h3>
+                <span className="text-lg">🔒</span>
+                <h3 className="text-xs font-black uppercase tracking-wider">Privacy & Profile Lock</h3>
+              </div>
+
+              <div className="p-3.5 bg-background dark:bg-card rounded-xl border border-border flex items-center justify-between">
+                <div>
+                  <h4 className="text-xs font-black text-[#0b4d3a] dark:text-foreground">Lock Profile</h4>
+                  <p className="text-[11px] text-muted-foreground mt-0.5">
+                    When locked, non-connections can only see your avatar and cover photo. Your posts, photos, and personal details are hidden.
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setProfileIsLocked(!profileIsLocked)}
+                  className={`h-7 px-3.5 rounded-full text-xs font-bold transition-all cursor-pointer ${profileIsLocked ? 'bg-orange-600 text-white' : 'bg-muted text-muted-foreground hover:bg-muted/80'}`}
+                >
+                  {profileIsLocked ? '🔒 Locked' : '🔓 Unlocked'}
+                </button>
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -538,6 +557,19 @@ export default function Home() {
                     <option value="sans">Geist (Default Sans)</option>
                     <option value="serif">Lora (Classical Serif)</option>
                     <option value="display">Space Grotesk (Modern Display)</option>
+                  </select>
+                </div>
+
+                <div className="space-y-1.5">
+                  <label htmlFor="theme-select" className="text-xs font-bold">Theme Mode</label>
+                  <select
+                    id="theme-select"
+                    value={themeMode}
+                    onChange={(e) => handleThemeChange(e.target.value as any)}
+                    className="w-full h-9.5 rounded-lg border border-input bg-background px-3 py-1.5 text-sm ring-offset-background focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 cursor-pointer font-semibold"
+                  >
+                    <option value="light">☀️ Light Mode</option>
+                    <option value="dark">🌙 Dark Mode</option>
                   </select>
                 </div>
               </div>
