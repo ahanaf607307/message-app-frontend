@@ -59,7 +59,12 @@ export default function Home() {
   const fetchConversations = useCallback(async () => {
     try {
       const response = await api.get('/conversations/all');
-      setConversations(response.data.data.conversations || []);
+      const data = response.data.data.conversations || [];
+      const mapped = data.map((c: any) => ({
+        ...c,
+        lastMessage: c.messages?.[0] || c.lastMessage
+      }));
+      setConversations(mapped);
     } catch (error) {
       console.error('Failed to fetch conversations:', error);
     } finally {
@@ -245,7 +250,7 @@ export default function Home() {
 
   return (
     <main className="flex h-screen overflow-hidden bg-[#faf6f0] text-[#0b4d3a] relative font-sans-active">
-      {/* Left Sidebar Menu Drawer (Absolute Overlay with Backdrop) */}
+      {/* Right Sidebar Menu Drawer (Absolute Overlay with Backdrop) */}
       {isSidebarOpen && (
         <>
           {/* Backdrop overlay */}
@@ -253,7 +258,7 @@ export default function Home() {
             className="fixed inset-0 bg-black/25 z-20 transition-opacity duration-300"
             onClick={() => setIsSidebarOpen(false)}
           />
-          <div className="absolute left-0 top-0 w-85 border-r border-[#ecd8bf]/60 h-full z-30 bg-background shadow-2xl transition-all duration-300 flex flex-col">
+          <div className="absolute right-0 top-0 w-85 border-l border-[#ecd8bf]/60 h-full z-30 bg-background shadow-2xl transition-all duration-300 flex flex-col">
             <Sidebar 
               conversations={conversations} 
               onSelectConversation={(conv) => {

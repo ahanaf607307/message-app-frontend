@@ -165,7 +165,7 @@ export default function Sidebar({
   };
 
   return (
-    <div className="w-85 border-r border-border flex flex-col h-full bg-background shadow-xs font-sans-active">
+    <div className="w-85 border-l border-border flex flex-col h-full bg-background shadow-xs font-sans-active">
       {/* Header */}
       <div className="p-4 border-b border-border flex items-center justify-between">
         <div className="flex items-center space-x-2.5 min-w-0">
