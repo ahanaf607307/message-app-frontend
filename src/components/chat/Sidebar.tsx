@@ -23,6 +23,7 @@ import { LogOut, Settings, Search, MoreVertical, Plus, UserPlus, Users, UserChec
 import { formatDistanceToNow } from 'date-fns';
 import api from '@/lib/api';
 import Link from 'next/link';
+import { toast } from 'react-hot-toast';
 
 interface SidebarProps {
   conversations: Conversation[];
@@ -126,10 +127,10 @@ export default function Sidebar({
   const handleSendConnection = async (receiverId: string) => {
     try {
       await api.post('/connections/request', { receiverId });
-      alert('Connection request sent!');
+      toast.success('Connection request sent!');
       fetchConnectionsData();
     } catch (err: any) {
-      alert(err.response?.data?.message || 'Failed to send request');
+      toast.error(err.response?.data?.message || 'Failed to send request');
     }
   };
 
@@ -139,7 +140,7 @@ export default function Sidebar({
       fetchConnectionsData();
       onRefreshConversations();
     } catch (err: any) {
-      alert(err.response?.data?.message || 'Failed to respond');
+      toast.error(err.response?.data?.message || 'Failed to respond');
     }
   };
 
@@ -150,7 +151,7 @@ export default function Sidebar({
       fetchConnectionsData();
       onRefreshConversations();
     } catch (err: any) {
-      alert(err.response?.data?.message || 'Failed to remove connection');
+      toast.error(err.response?.data?.message || 'Failed to remove connection');
     }
   };
 
@@ -500,7 +501,7 @@ export default function Sidebar({
                                 onSelectConversation(res.data.data);
                                 setActiveTab('chats');
                               } catch (e: any) {
-                                alert(e.response?.data?.message || 'Failed to open chat');
+                                toast.error(e.response?.data?.message || 'Failed to open chat');
                               }
                             }}
                           >

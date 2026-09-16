@@ -13,6 +13,7 @@ import { Loader2 } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { toast } from 'react-hot-toast';
 
 export default function Home() {
   const { user, loading: authLoading, updateProfile, activeFont, changeFont } = useAuth();
@@ -113,7 +114,7 @@ export default function Home() {
       setIsNewGroupOpen(true);
     } catch (err: any) {
       console.error('Failed to fetch friends:', err);
-      alert('Failed to load friends list. Please try again.');
+      toast.error('Failed to load friends list. Please try again.');
     } finally {
       setFormSubmitting(false);
     }
@@ -198,7 +199,7 @@ export default function Home() {
         coverFile: profileCover
       });
       setIsProfileOpen(false);
-      alert('Profile updated successfully!');
+      toast.success('Profile updated successfully!');
     } catch (err: any) {
       setFormError(err.response?.data?.message || 'Failed to update profile');
     } finally {
@@ -224,7 +225,7 @@ export default function Home() {
       setOldPassword('');
       setNewPassword('');
       setConfirmPassword('');
-      alert('Password changed successfully!');
+      toast.success('Password changed successfully!');
     } catch (err: any) {
       setFormError(err.response?.data?.message || 'Failed to change password');
     } finally {
@@ -280,6 +281,7 @@ export default function Home() {
           onSelectConversation={setSelectedConversation}
           onSwitchToChats={() => setIsSidebarOpen(!isSidebarOpen)}
           onOpenProfile={openProfileModal}
+          unreadConversationCount={conversations.reduce((acc, conv) => acc + (conv.unseenCount || 0), 0)}
         />
       </div>
 

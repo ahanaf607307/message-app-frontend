@@ -12,6 +12,7 @@ import api from '@/lib/api';
 import { getSocket } from '@/lib/socket';
 import { format } from 'date-fns';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog';
+import { toast } from 'react-hot-toast';
 
 interface ChatWindowProps {
   conversation: Conversation;
@@ -195,7 +196,7 @@ export default function ChatWindow({
       setEditingMessageId(null);
       onRefreshConversations();
     } catch (err) {
-      alert('Failed to edit message');
+      toast.error('Failed to edit message');
     }
   };
 
@@ -207,7 +208,7 @@ export default function ChatWindow({
       setMessages(prev => prev.filter(m => m.id !== msgId));
       onRefreshConversations();
     } catch (err) {
-      alert('Failed to delete message');
+      toast.error('Failed to delete message');
     }
   };
 
@@ -220,7 +221,7 @@ export default function ChatWindow({
       onCloseChat();
       onRefreshConversations();
     } catch (err) {
-      alert('Failed to delete conversation');
+      toast.error('Failed to delete conversation');
     }
   };
 
@@ -250,12 +251,12 @@ export default function ChatWindow({
     setInfoLoading(true);
     try {
       await api.post(`/conversations/${conversation.id}/participants`, { userId: addMemberId });
-      alert('Participant added successfully!');
+      toast.success('Participant added successfully!');
       setAddMemberId('');
       setIsInfoOpen(false);
       onRefreshConversations();
     } catch (err: any) {
-      alert(err.response?.data?.message || 'Failed to add participant');
+      toast.error(err.response?.data?.message || 'Failed to add participant');
     } finally {
       setInfoLoading(false);
     }
@@ -266,11 +267,11 @@ export default function ChatWindow({
     setInfoLoading(true);
     try {
       await api.delete(`/conversations/${conversation.id}/participants/${participantId}`);
-      alert('Participant removed.');
+      toast.success('Participant removed.');
       setIsInfoOpen(false);
       onRefreshConversations();
     } catch (err: any) {
-      alert(err.response?.data?.message || 'Failed to remove participant');
+      toast.error(err.response?.data?.message || 'Failed to remove participant');
     } finally {
       setInfoLoading(false);
     }
@@ -455,7 +456,7 @@ export default function ChatWindow({
                   }
                 } catch (err: any) {
                   const errMsg = err.response?.data?.message || err.message || 'Failed to upload image';
-                  alert(`Upload Error: ${errMsg}. Please verify your Cloudinary configurations.`);
+                  toast.error(`Upload Error: ${errMsg}. Please verify your Cloudinary configurations.`);
                 }
               }}
             />

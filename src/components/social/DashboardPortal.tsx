@@ -26,6 +26,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { User as UserIcon, Settings, LogOut } from 'lucide-react';
+import { toast } from 'react-hot-toast';
 
 interface DashboardPortalProps {
   currentUser: User | null;
@@ -33,6 +34,7 @@ interface DashboardPortalProps {
   onSelectConversation: (conversation: Conversation) => void;
   onSwitchToChats?: () => void;
   onOpenProfile?: () => void;
+  unreadConversationCount?: number;
 }
 
 export default function DashboardPortal({ 
@@ -40,7 +42,8 @@ export default function DashboardPortal({
   onRefreshConversations, 
   onSelectConversation,
   onSwitchToChats,
-  onOpenProfile
+  onOpenProfile,
+  unreadConversationCount = 0
 }: DashboardPortalProps) {
   const { updateProfile, logout } = useAuth();
   const { theme, setTheme } = useTheme();
@@ -173,10 +176,10 @@ export default function DashboardPortal({
   const handleSendRequest = async (receiverId: string) => {
     try {
       await api.post('/connections/request', { receiverId });
-      alert('Connection request sent successfully!');
+      toast.success('Connection request sent successfully!');
       fetchConnections();
     } catch (err: any) {
-      alert(err.response?.data?.message || 'Failed to send request');
+      toast.error(err.response?.data?.message || 'Failed to send request');
     }
   };
 
@@ -186,7 +189,7 @@ export default function DashboardPortal({
       fetchConnections();
       onRefreshConversations();
     } catch (err: any) {
-      alert(err.response?.data?.message || 'Failed to respond');
+      toast.error(err.response?.data?.message || 'Failed to respond');
     }
   };
 
@@ -197,7 +200,7 @@ export default function DashboardPortal({
       fetchConnections();
       onRefreshConversations();
     } catch (err: any) {
-      alert(err.response?.data?.message || 'Failed to disconnect');
+      toast.error(err.response?.data?.message || 'Failed to disconnect');
     }
   };
 
@@ -218,7 +221,7 @@ export default function DashboardPortal({
       setIsCreatePostOpen(false);
       await fetchPosts();
     } catch (err: any) {
-      alert('Failed to publish post');
+      toast.error('Failed to publish post');
     } finally {
       setIsUploading(false);
     }
@@ -241,7 +244,7 @@ export default function DashboardPortal({
         fetchTargetUserProfile(viewingUserId);
       }
     } catch (err: any) {
-      alert('Failed to update post');
+      toast.error('Failed to update post');
     } finally {
       setIsUploading(false);
     }
@@ -256,7 +259,7 @@ export default function DashboardPortal({
         fetchTargetUserProfile(viewingUserId);
       }
     } catch (err: any) {
-      alert('Failed to delete post');
+      toast.error('Failed to delete post');
     }
   };
 
@@ -279,7 +282,7 @@ export default function DashboardPortal({
       await api.post('/stories', { mediaUrl: mediaUrl.trim() });
       fetchStories();
     } catch (err: any) {
-      alert('Failed to share story');
+      toast.error('Failed to share story');
     }
   };
 
@@ -301,7 +304,7 @@ export default function DashboardPortal({
       setCommentInput('');
       fetchPosts();
     } catch (err: any) {
-      alert('Failed to add comment');
+      toast.error('Failed to add comment');
     }
   };
 
@@ -317,11 +320,11 @@ export default function DashboardPortal({
         coverFile: type === 'cover' ? file : null
       });
       await fetchPosts();
-      alert(`${type === 'avatar' ? 'Profile picture' : 'Cover photo'} updated successfully!`);
+      toast.success(`${type === 'avatar' ? 'Profile picture' : 'Cover photo'} updated successfully!`);
     } catch (err: any) {
       console.error(err);
       const errMsg = err.response?.data?.message || err.message || 'Failed to upload image';
-      alert(`Upload Error: ${errMsg}`);
+      toast.error(`Upload Error: ${errMsg}`);
     } finally {
       setIsUploading(false);
     }
@@ -338,11 +341,11 @@ export default function DashboardPortal({
         email: currentUser.email,
         isLocked: nextLocked
       });
-      alert(nextLocked 
+      toast.success(nextLocked 
         ? '🔒 Profile locked successfully! Non-connections can only see your avatar and cover photo.' 
         : '🔓 Profile unlocked successfully! Everyone can view your public profile.');
     } catch (err) {
-      alert('Failed to update profile lock status');
+      toast.error('Failed to update profile lock status');
     } finally {
       setIsUploading(false);
     }
@@ -778,7 +781,7 @@ export default function DashboardPortal({
                       });
                       onSelectConversation(res.data.data);
                     } catch (e) {
-                      alert('Failed to launch chat window');
+                      toast.error('Failed to launch chat window');
                     }
                   }}
                   className="h-8 text-[11px] bg-[#0b4d3a] hover:bg-[#08362b] text-white font-bold rounded-xl cursor-pointer"
@@ -853,11 +856,16 @@ export default function DashboardPortal({
           <Button 
             variant="ghost" 
             size="icon" 
-            className="h-10 w-10 rounded-full bg-[#f3eae0] dark:bg-muted hover:bg-[#ebdccb] dark:hover:bg-muted/80 text-[#0b4d3a] dark:text-foreground cursor-pointer"
+            className="h-10 w-10 rounded-full bg-[#f3eae0] dark:bg-muted hover:bg-[#ebdccb] dark:hover:bg-muted/80 text-[#0b4d3a] dark:text-foreground cursor-pointer relative"
             onClick={onSwitchToChats}
             title="Messages"
           >
             <MessageSquare className="h-4 w-4" />
+            {unreadConversationCount > 0 && (
+              <span className="absolute -top-0.5 -right-0.5 h-4 w-4 rounded-full bg-orange-600 text-white text-[9px] font-black flex items-center justify-center shadow-sm">
+                {unreadConversationCount > 99 ? '99+' : unreadConversationCount}
+              </span>
+            )}
           </Button>
 
           <Button 
@@ -1093,7 +1101,7 @@ export default function DashboardPortal({
                                     });
                                     onSelectConversation(res.data.data);
                                   } catch (e) {
-                                    alert('Failed to open chat');
+                                    toast.error('Failed to open chat');
                                   }
                                 }}
                                 className="h-8.5 text-[11px] bg-[#0b4d3a] hover:bg-[#08362b] dark:bg-primary dark:hover:bg-primary/80 text-white font-bold rounded-xl cursor-pointer shadow-3xs"
@@ -1294,7 +1302,7 @@ export default function DashboardPortal({
                                     });
                                     onSelectConversation(res.data.data);
                                   } catch (e) {
-                                    alert('Failed to launch chat window');
+                                    toast.error('Failed to launch chat window');
                                   }
                                 }}
                               >
@@ -1514,7 +1522,7 @@ export default function DashboardPortal({
                                     });
                                     onSelectConversation(res.data.data);
                                   } catch (e) {
-                                    alert('Failed to launch chat window');
+                                    toast.error('Failed to launch chat window');
                                   }
                                 }}
                               >
@@ -1599,7 +1607,7 @@ export default function DashboardPortal({
                         });
                         onSelectConversation(res.data.data);
                       } catch (e) {
-                        alert('Failed to open chat window');
+                        toast.error('Failed to open chat window');
                       }
                     }}
                   >
@@ -1708,7 +1716,7 @@ export default function DashboardPortal({
                           setPostMediaUrl(res.data.url);
                         }
                       } catch (err) {
-                        alert('Failed to upload image. Please verify your Cloudinary configurations.');
+                        toast.error('Failed to upload image. Please verify your Cloudinary configurations.');
                       } finally {
                         setIsUploading(false);
                       }
