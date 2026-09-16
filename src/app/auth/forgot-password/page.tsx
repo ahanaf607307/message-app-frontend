@@ -11,6 +11,7 @@ import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import api from '@/lib/api';
 import { Loader2 } from 'lucide-react';
+import { toast } from 'react-hot-toast';
 
 const emailSchema = z.object({
   email: z.string().email({ message: 'Invalid email address' }),
@@ -77,7 +78,7 @@ export default function ForgotPasswordPage() {
         },
       });
 
-      alert('Password reset successfully! You can now log in.');
+      toast.success('Password reset successfully! You can now log in.');
       router.push('/auth/login');
     } catch (err: any) {
       setError(err.response?.data?.message || 'Failed to reset password. Please try again.');

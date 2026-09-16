@@ -10,6 +10,7 @@ import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { toast } from 'react-hot-toast';
 
 // Custom SVG Chart Component for zero-dependency high-fidelity analytics
 function CustomSvgChart({ title, data, labelColor = 'text-primary' }: { title: string, data: number[], labelColor?: string }) {
@@ -152,11 +153,11 @@ export default function AdminPage() {
         name: editName,
         email: editEmail
       });
-      alert('User updated successfully!');
+      toast.success('User updated successfully!');
       setEditingUser(null);
       fetchDashboardData();
     } catch (err: any) {
-      alert(err.response?.data?.message || 'Failed to update user');
+      toast.error(err.response?.data?.message || 'Failed to update user');
     } finally {
       setDialogSubmitting(false);
     }

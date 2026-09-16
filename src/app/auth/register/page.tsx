@@ -11,6 +11,7 @@ import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import api from '@/lib/api';
 import { Loader2 } from 'lucide-react';
+import { toast } from 'react-hot-toast';
 
 const registerSchema = z.object({
   name: z.string().min(2, { message: 'Name must be at least 2 characters' }),
@@ -102,7 +103,7 @@ export default function RegisterPage() {
         email: registeredEmail,
         name: registeredName,
       });
-      alert('Verification OTP sent successfully!');
+      toast.success('Verification OTP sent successfully!');
     } catch (err: any) {
       setError(err.response?.data?.message || 'Failed to resend OTP.');
     } finally {
