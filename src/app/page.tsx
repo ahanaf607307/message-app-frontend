@@ -255,10 +255,10 @@ export default function Home() {
         <>
           {/* Backdrop overlay */}
           <div 
-            className="fixed inset-0 bg-black/25 z-20 transition-opacity duration-300"
+            className="fixed inset-0 top-16 bg-black/25 z-20 transition-opacity duration-300"
             onClick={() => setIsSidebarOpen(false)}
           />
-          <div className="absolute right-0 top-0 w-85 border-l border-[#ecd8bf]/60 h-full z-30 bg-background shadow-2xl transition-all duration-300 flex flex-col">
+          <div className="absolute right-0 top-16 bottom-0 w-85 border-l border-[#ecd8bf]/60 z-30 bg-background shadow-2xl transition-all duration-300 flex flex-col">
             <Sidebar 
               conversations={conversations} 
               onSelectConversation={(conv) => {

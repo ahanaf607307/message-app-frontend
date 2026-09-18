@@ -29,6 +29,8 @@ api.interceptors.response.use(
         localStorage.removeItem('token');
         localStorage.removeItem('user');
         window.location.href = '/auth/login';
+        // Return a pending promise to halt the promise chain during redirect
+        return new Promise(() => {});
       }
     }
     return Promise.reject(error);
