@@ -911,7 +911,7 @@ export default function DashboardPortal({
                               <div className="flex items-center space-x-1.5">
                                 <span className="font-extrabold text-sm text-[#0b4d3a] dark:text-foreground block truncate hover:underline">{u.name}</span>
                                 {u.isLocked && (
-                                  <Lock className="h-3 w-3 text-orange-600 dark:text-orange-400" title="Profile is locked" />
+                                  <Lock className="h-3 w-3 text-orange-600 dark:text-orange-400" />
                                 )}
                               </div>
                               {u.nickname && <span className="text-[10px] text-[#8f7d6a] dark:text-muted-foreground block truncate">({u.nickname})</span>}
@@ -1132,7 +1132,7 @@ export default function DashboardPortal({
                                 <div className="flex items-center space-x-1.5">
                                   <span className="font-black text-sm text-[#0b4d3a] dark:text-foreground truncate block hover:underline">{friend.name}</span>
                                   {friend.isLocked && (
-                                    <Lock className="h-3 w-3 text-orange-600 dark:text-orange-400" title="Locked profile" />
+                                    <Lock className="h-3 w-3 text-orange-600 dark:text-orange-400" />
                                   )}
                                 </div>
                                 <span className="text-[10px] text-muted-foreground mt-0.5 block flex items-center gap-1 font-semibold">
