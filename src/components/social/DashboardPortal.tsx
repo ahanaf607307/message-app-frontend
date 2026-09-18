@@ -85,6 +85,7 @@ export default function DashboardPortal({
 
   // Upload loading overlay state
   const [isUploading, setIsUploading] = useState(false);
+  const [selectedImage, setSelectedImage] = useState<string | null>(null);
   const [uploadingText, setUploadingText] = useState('Uploading image...');
 
   // Search state
@@ -405,7 +406,7 @@ export default function DashboardPortal({
 
             {/* Post Options Menu (Right side button) */}
             {isAuthor && (
-              <DropdownMenu>
+              <DropdownMenu modal={false}>
                 <DropdownMenuTrigger
                   render={
                     <Button variant="ghost" size="icon" className="h-8 w-8 rounded-full hover:bg-[#ebdccb] dark:hover:bg-muted text-[#8f7d6a] dark:text-muted-foreground cursor-pointer" />
@@ -868,23 +869,32 @@ export default function DashboardPortal({
             )}
           </Button>
 
-          <Button 
-            variant="ghost" 
-            size="icon" 
-            className="h-10 w-10 rounded-full bg-[#f3eae0] dark:bg-muted hover:bg-[#ebdccb] dark:hover:bg-muted/80 text-[#0b4d3a] dark:text-foreground cursor-pointer relative"
-            onClick={() => {
-              setActiveSubTab('connections');
-              setConnectionsTab('requests');
-            }}
-            title="Notifications"
-          >
-            <Bell className="h-4 w-4" />
-            {pendingIncoming.length > 0 && (
-              <span className="absolute -top-0.5 -right-0.5 h-4 w-4 rounded-full bg-orange-600 text-white text-[9px] font-black flex items-center justify-center">
-                {pendingIncoming.length}
-              </span>
-            )}
-          </Button>
+          <DropdownMenu modal={false}>
+            <DropdownMenuTrigger asChild>
+              <Button 
+                variant="ghost" 
+                size="icon" 
+                className="h-10 w-10 rounded-full bg-[#f3eae0] dark:bg-muted hover:bg-[#ebdccb] dark:hover:bg-muted/80 text-[#0b4d3a] dark:text-foreground cursor-pointer relative outline-none"
+                title="Notifications"
+              >
+                <Bell className="h-4 w-4" />
+                {pendingIncoming.length > 0 && (
+                  <span className="absolute -top-0.5 -right-0.5 h-4 w-4 rounded-full bg-orange-600 text-white text-[9px] font-black flex items-center justify-center shadow-sm">
+                    {pendingIncoming.length}
+                  </span>
+                )}
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="w-64 rounded-xl border border-border bg-card shadow-lg p-2 text-foreground z-50">
+              <div className="flex items-center justify-between px-2 pt-1 pb-2 border-b border-border/60">
+                <span className="text-xs font-black uppercase tracking-wider text-muted-foreground">Notifications</span>
+              </div>
+              <div className="py-6 text-center">
+                <Bell className="h-8 w-8 mx-auto text-muted-foreground/30 mb-2" />
+                <p className="text-xs text-muted-foreground font-bold">No new notifications</p>
+              </div>
+            </DropdownMenuContent>
+          </DropdownMenu>
 
           <Button 
             variant="ghost" 
@@ -899,7 +909,7 @@ export default function DashboardPortal({
             <UserPlus className="h-4 w-4" />
           </Button>
 
-          <DropdownMenu>
+          <DropdownMenu modal={false}>
             <DropdownMenuTrigger
               render={
                 <button 
@@ -1407,7 +1417,12 @@ export default function DashboardPortal({
                   {/* Cover Photo */}
                   <div className="relative h-56 bg-linear-to-r from-teal-800 to-[#0b4d3a] dark:from-indigo-950 dark:to-teal-950 group">
                     {activeProfileUser?.coverUrl ? (
-                      <img src={activeProfileUser.coverUrl} alt="Cover" className="w-full h-full object-cover" />
+                      <img 
+                        src={activeProfileUser.coverUrl} 
+                        alt="Cover" 
+                        className="w-full h-full object-cover cursor-pointer"
+                        onClick={() => setSelectedImage(activeProfileUser.coverUrl || null)}
+                      />
                     ) : (
                       <div className="w-full h-full opacity-40 bg-radial-to-br from-emerald-500/20 via-transparent to-transparent" />
                     )}
@@ -1439,7 +1454,10 @@ export default function DashboardPortal({
                         
                         {/* Avatar */}
                         <div className="relative group">
-                          <Avatar className="h-32 w-32 border-4 border-[#faf6f0] dark:border-card shadow-lg ring-1 ring-black/5">
+                          <Avatar 
+                            className={`h-32 w-32 border-4 border-[#faf6f0] dark:border-card shadow-lg ring-1 ring-black/5 ${activeProfileUser?.avatarUrl ? 'cursor-pointer' : ''}`}
+                            onClick={() => activeProfileUser?.avatarUrl && setSelectedImage(activeProfileUser.avatarUrl)}
+                          >
                             <AvatarImage src={activeProfileUser?.avatarUrl} />
                             <AvatarFallback className="bg-[#0b4d3a]/10 text-[#0b4d3a] dark:bg-muted dark:text-foreground text-4xl font-black">
                               {activeProfileUser?.name?.charAt(0)}
@@ -1573,23 +1591,10 @@ export default function DashboardPortal({
         {/* Right Sidebar Column */}
         <aside className="hidden lg:block w-72 border-l border-[#ecd8bf]/60 dark:border-border p-4 space-y-6 overflow-y-auto bg-[#faf6f0] dark:bg-card select-none flex-shrink-0">
           
-          {/* Birthdays */}
-          <div className="space-y-3">
-            <h5 className="text-[10px] font-bold text-[#8f7d6a] dark:text-muted-foreground uppercase tracking-wider">Birthdays</h5>
-            <div className="flex items-start space-x-3 text-xs leading-normal">
-              <Gift className="h-5 w-5 text-orange-600 flex-shrink-0 mt-0.5 animate-bounce" />
-              <p className="text-[11px] text-[#0b4d3a] dark:text-foreground font-semibold">
-                <strong>Anna Sharma&apos;s</strong> birthday today!
-              </p>
-            </div>
-          </div>
-
-          <div className="h-[1px] bg-[#ecd8bf]/60 dark:border-border"></div>
-
           {/* Contacts/Connected People List */}
           <div className="space-y-3.5">
             <div className="flex items-center justify-between text-[#8f7d6a] dark:text-muted-foreground text-[10px] font-bold uppercase tracking-wider">
-              <span>Contacts ({friends.length})</span>
+              <span>Connections ({friends.length})</span>
               <ChevronDown className="h-3.5 w-3.5" />
             </div>
             
@@ -1627,7 +1632,7 @@ export default function DashboardPortal({
                 ))
               ) : (
                 <div className="text-center py-4">
-                  <span className="text-[10px] text-[#8f7d6a] dark:text-muted-foreground">No contacts found</span>
+                  <span className="text-[10px] text-[#8f7d6a] dark:text-muted-foreground">No connections found</span>
                 </div>
               )}
             </div>
@@ -1788,6 +1793,14 @@ export default function DashboardPortal({
         </DialogContent>
       </Dialog>
 
+      {/* 🌟 Fullscreen Image Viewer Modal */}
+      <Dialog open={!!selectedImage} onOpenChange={() => setSelectedImage(null)}>
+        <DialogContent className="max-w-4xl p-0 bg-transparent border-none shadow-none overflow-hidden flex items-center justify-center">
+          {selectedImage && (
+            <img src={selectedImage} alt="Fullscreen View" className="max-w-full max-h-[90vh] object-contain rounded-lg shadow-2xl" />
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

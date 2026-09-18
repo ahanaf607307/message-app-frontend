@@ -406,7 +406,7 @@ export default function Home() {
                   <label htmlFor="name" className="text-xs font-bold">Full Name</label>
                   <Input
                     id="name"
-                    placeholder="e.g. User One"
+                    placeholder="e.g. John Doe"
                     value={profileName}
                     onChange={(e) => setProfileName(e.target.value)}
                     className="h-9.5 rounded-lg border-border bg-background"
@@ -417,7 +417,7 @@ export default function Home() {
                   <label htmlFor="nickname" className="text-xs font-bold">Nickname (optional)</label>
                   <Input
                     id="nickname"
-                    placeholder="e.g. MasterMind"
+                    placeholder="e.g. Johnny"
                     value={profileNickname}
                     onChange={(e) => setProfileNickname(e.target.value)}
                     className="h-9.5 rounded-lg border-border bg-background"
@@ -449,7 +449,7 @@ export default function Home() {
                   <label htmlFor="livesIn" className="text-xs font-bold">Current City</label>
                   <Input
                     id="livesIn"
-                    placeholder="e.g. Dhaka, Bangladesh"
+                    placeholder="e.g. New York, USA"
                     value={profileLivesIn}
                     onChange={(e) => setProfileLivesIn(e.target.value)}
                     className="h-9.5 rounded-lg border-border bg-background"
@@ -459,7 +459,7 @@ export default function Home() {
                   <label htmlFor="fromCity" className="text-xs font-bold">Hometown</label>
                   <Input
                     id="fromCity"
-                    placeholder="e.g. Rangpur City"
+                    placeholder="e.g. London"
                     value={profileFromCity}
                     onChange={(e) => setProfileFromCity(e.target.value)}
                     className="h-9.5 rounded-lg border-border bg-background"
@@ -469,7 +469,7 @@ export default function Home() {
                   <label htmlFor="gender" className="text-xs font-bold">Gender</label>
                   <Input
                     id="gender"
-                    placeholder="e.g. Male"
+                    placeholder="e.g. Prefer not to say"
                     value={profileGender}
                     onChange={(e) => setProfileGender(e.target.value)}
                     className="h-9.5 rounded-lg border-border bg-background"
@@ -490,7 +490,7 @@ export default function Home() {
                   <label htmlFor="workplace" className="text-xs font-bold">Workplace Company</label>
                   <Input
                     id="workplace"
-                    placeholder="e.g. Join Venture AI"
+                    placeholder="e.g. Tech Corp Inc."
                     value={profileWorkplace}
                     onChange={(e) => setProfileWorkplace(e.target.value)}
                     className="h-9.5 rounded-lg border-border bg-background"
@@ -500,7 +500,7 @@ export default function Home() {
                   <label htmlFor="workTitle" className="text-xs font-bold">Job Title / Specialty</label>
                   <Input
                     id="workTitle"
-                    placeholder="e.g. Wordpress Theme & Plugin Developer"
+                    placeholder="e.g. Software Engineer"
                     value={profileWorkTitle}
                     onChange={(e) => setProfileWorkTitle(e.target.value)}
                     className="h-9.5 rounded-lg border-border bg-background"
@@ -510,7 +510,7 @@ export default function Home() {
                   <label htmlFor="educationSchool" className="text-xs font-bold">School / University</label>
                   <Input
                     id="educationSchool"
-                    placeholder="e.g. Canadian University of Bangladesh"
+                    placeholder="e.g. State University"
                     value={profileEducationSchool}
                     onChange={(e) => setProfileEducationSchool(e.target.value)}
                     className="h-9.5 rounded-lg border-border bg-background"
@@ -520,7 +520,7 @@ export default function Home() {
                   <label htmlFor="educationDept" className="text-xs font-bold">Department / Major</label>
                   <Input
                     id="educationDept"
-                    placeholder="e.g. Department of CSE"
+                    placeholder="e.g. Computer Science"
                     value={profileEducationDept}
                     onChange={(e) => setProfileEducationDept(e.target.value)}
                     className="h-9.5 rounded-lg border-border bg-background"

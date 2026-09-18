@@ -266,9 +266,7 @@ export default function Sidebar({
           <div className="flex space-x-1.5 px-4 pb-3 pt-1 overflow-x-auto no-scrollbar">
             {[
               { id: 'all', label: 'All' },
-              { id: 'unread', label: 'Unread' },
-              { id: 'groups', label: 'Groups' },
-              { id: 'direct', label: 'Connected' }
+              { id: 'unread', label: 'Unread' }
             ].map((pill) => (
               <button
                 key={pill.id}
@@ -351,210 +349,46 @@ export default function Sidebar({
       ) : (
         <>
           <div className="p-4 pt-2">
-            <div className="relative">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-              <Input 
-                placeholder="Find and connect with users..." 
-                className="pl-9 bg-muted/40 border-transparent focus-visible:ring-primary/50 text-sm h-9"
-                value={searchQuery}
-                onChange={(e) => handleSearchUsers(e.target.value)}
-              />
-            </div>
+            <h5 className="text-[11px] font-bold tracking-wider text-muted-foreground uppercase flex items-center gap-1 mb-2">
+              <Users className="h-3 w-3" /> Active Connections ({friends.length})
+            </h5>
           </div>
-
           <ScrollArea className="flex-1">
-            <div className="px-4 pb-4 space-y-4">
-              {/* Search Results */}
-              {searchQuery && (
-                <div className="space-y-2">
-                  <h5 className="text-[11px] font-bold tracking-wider text-muted-foreground uppercase flex items-center gap-1">
-                    <Search className="h-3 w-3" /> Search Results
-                  </h5>
-                  <div className="space-y-1">
-                    {searchResults.length > 0 ? (
-                      searchResults.filter(u => u.id !== user?.id).map((foundUser) => {
-                        const status = getConnectionStatus(foundUser.id);
-                        return (
-                          <div key={foundUser.id} className="flex items-center justify-between p-2 hover:bg-muted/30 rounded-lg">
-                            <div className="flex items-center space-x-2.5 min-w-0">
-                              <Avatar className="h-8 w-8">
-                                <AvatarImage src={foundUser.avatarUrl} />
-                                <AvatarFallback className="bg-muted text-muted-foreground text-xs">{foundUser.name.charAt(0)}</AvatarFallback>
-                              </Avatar>
-                              <span className="text-xs font-semibold truncate">{foundUser.name}</span>
-                            </div>
-                            <div>
-                              {status === 'friend' && (
-                                <Badge variant="outline" className="text-[10px] border-green-500/30 text-green-500 bg-green-500/5 flex items-center gap-1">
-                                  <UserCheck className="h-3 w-3" /> Connected
-                                </Badge>
-                              )}
-                              {typeof status === 'object' && status.type === 'sent' && (
-                                <Badge variant="outline" className="text-[10px] border-amber-500/30 text-amber-500 bg-amber-500/5 flex items-center gap-1">
-                                  <Clock className="h-3 w-3" /> Sent
-                                </Badge>
-                              )}
-                              {typeof status === 'object' && status.type === 'incoming' && (
-                                <div className="flex space-x-1">
-                                  <Button size="icon-sm" className="h-6 w-6 text-[10px] rounded bg-primary hover:bg-primary/95 text-white" onClick={() => handleRespondRequest(status.connectionId, 'accepted')}>
-                                    ✓
-                                  </Button>
-                                  <Button variant="outline" size="icon-sm" className="h-6 w-6 text-[10px] rounded border-red-500/30 hover:bg-red-50 dark:hover:bg-red-950/20 text-red-500" onClick={() => handleRespondRequest(status.connectionId, 'rejected')}>
-                                    ✗
-                                  </Button>
-                                </div>
-                              )}
-                              {status === 'none' && (
-                                <Button size="sm" variant="ghost" className="h-7 text-xs px-2.5 gap-1.5 text-primary hover:bg-primary/5 hover:text-primary" onClick={() => handleSendConnection(foundUser.id)}>
-                                  <UserPlus className="h-3.5 w-3.5" /> Connect
-                                </Button>
-                              )}
-                            </div>
-                          </div>
-                        );
-                      })
-                    ) : (
-                      <p className="text-[11px] text-muted-foreground py-2 text-center">No users found matching search query</p>
-                    )}
-                  </div>
-                  <DropdownMenuSeparator className="opacity-50" />
-                </div>
-              )}
-
-              {/* Incoming Requests (Connection Request Card Grid Layout) */}
-              {pendingIncoming.length > 0 && (
-                <div className="space-y-2.5">
-                  <div className="flex items-center justify-between px-1">
-                    <h5 className="text-[11px] font-bold tracking-wider text-muted-foreground uppercase flex items-center gap-1">
-                      <UserPlus className="h-3 w-3 text-primary animate-pulse" /> Connection Requests
-                    </h5>
-                    <span className="text-[10px] text-primary font-bold hover:underline cursor-pointer">See all</span>
-                  </div>
-                  <div className="grid grid-cols-2 gap-2">
-                    {pendingIncoming.map((req) => (
-                      <div key={req.id} className="bg-card border border-border/60 rounded-xl overflow-hidden shadow-2xs flex flex-col hover:border-border/80 transition-colors">
-                        <div className="aspect-square bg-muted relative overflow-hidden flex-shrink-0">
-                          {req.sender.avatarUrl ? (
-                            // eslint-disable-next-line @next/next/no-img-element
-                            <img src={req.sender.avatarUrl} alt={req.sender.name} className="w-full h-full object-cover animate-fade-in" />
-                          ) : (
-                            <div className="w-full h-full flex items-center justify-center font-bold text-lg text-muted-foreground bg-primary/5 text-primary">
-                              {req.sender.name.charAt(0)}
-                            </div>
-                          )}
-                        </div>
-                        <div className="p-2 flex flex-col flex-1 justify-between bg-muted/5 min-h-[95px]">
-                          <span className="font-bold text-xs text-foreground truncate mb-2 block">{req.sender.name}</span>
-                          <div className="space-y-1.5 mt-auto">
-                            <Button 
-                              size="sm" 
-                              className="w-full h-7 text-[10px] bg-primary hover:bg-primary/95 text-white font-bold rounded-lg cursor-pointer"
-                              onClick={() => handleRespondRequest(req.id, 'accepted')}
-                            >
-                              Confirm
-                            </Button>
-                            <Button 
-                              variant="outline" 
-                              size="sm" 
-                              className="w-full h-7 text-[10px] border-transparent bg-secondary/80 hover:bg-secondary text-foreground font-semibold rounded-lg cursor-pointer"
-                              onClick={() => handleRespondRequest(req.id, 'rejected')}
-                            >
-                              Delete
-                            </Button>
-                          </div>
-                        </div>
+            <div className="px-2 space-y-0.5 pb-4">
+              {loadingConnections && friends.length === 0 ? (
+                <p className="text-[11px] text-muted-foreground py-4 text-center">Loading connections...</p>
+              ) : friends.length > 0 ? (
+                friends.map((friend) => (
+                  <button 
+                    key={friend.id} 
+                    className="w-full flex items-center justify-between p-3 hover:bg-muted/40 rounded-xl group animate-fade-in border border-transparent transition-all cursor-pointer text-left"
+                    onClick={async () => {
+                      try {
+                        const res = await api.post('/conversations/create', {
+                          participantIds: [friend.id],
+                          isGroupChat: false
+                        });
+                        onSelectConversation(res.data.data);
+                        setActiveTab('chats');
+                      } catch (e: any) {
+                        toast.error(e.response?.data?.message || 'Failed to open chat');
+                      }
+                    }}
+                  >
+                    <div className="flex items-center space-x-3 min-w-0">
+                      <div className="relative">
+                        <Avatar className="h-10 w-10 border border-border/50 shadow-xs">
+                          <AvatarImage src={friend.avatarUrl || undefined} />
+                          <AvatarFallback className="bg-muted text-muted-foreground font-bold">{friend.name.charAt(0)}</AvatarFallback>
+                        </Avatar>
+                        <span className="absolute bottom-0 right-0 h-2.5 w-2.5 bg-green-500 border-2 border-background rounded-full"></span>
                       </div>
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              {/* Connected People List */}
-              <div className="space-y-2">
-                <h5 className="text-[11px] font-bold tracking-wider text-muted-foreground uppercase flex items-center gap-1">
-                  <Users className="h-3 w-3" /> Connected People ({friends.length})
-                </h5>
-                {loadingConnections && friends.length === 0 ? (
-                  <p className="text-[11px] text-muted-foreground py-4 text-center">Loading connections list...</p>
-                ) : friends.length > 0 ? (
-                  <div className="space-y-0.5">
-                    {friends.map((friend) => (
-                      <div key={friend.id} className="flex items-center justify-between p-2 hover:bg-muted/30 rounded-lg group animate-fade-in">
-                        <div className="flex items-center space-x-2.5 min-w-0">
-                          <Avatar className="h-8 w-8">
-                            <AvatarImage src={friend.avatarUrl} />
-                            <AvatarFallback className="bg-muted text-muted-foreground text-xs">{friend.name.charAt(0)}</AvatarFallback>
-                          </Avatar>
-                          <span className="text-xs font-semibold truncate">{friend.name}</span>
-                        </div>
-                        <div className="flex items-center space-x-1.5">
-                          <Button 
-                            size="sm" 
-                            variant="ghost" 
-                            className="h-7 text-[10px] px-2 text-primary hover:bg-primary/5 hover:text-primary font-bold cursor-pointer"
-                            onClick={async () => {
-                              try {
-                                const res = await api.post('/conversations/create', {
-                                  participantIds: [friend.id],
-                                  isGroupChat: false
-                                });
-                                onSelectConversation(res.data.data);
-                                setActiveTab('chats');
-                              } catch (e: any) {
-                                toast.error(e.response?.data?.message || 'Failed to open chat');
-                              }
-                            }}
-                          >
-                            Chat
-                          </Button>
-                          {friend.connectionId && (
-                            <Button 
-                              size="sm" 
-                              variant="ghost" 
-                              className="h-7 w-7 p-0 text-red-500 hover:bg-red-50 dark:hover:bg-red-950/20 font-bold cursor-pointer"
-                              title="Disconnect connection"
-                              onClick={() => handleRemoveConnection(friend.connectionId!)}
-                            >
-                              ✗
-                            </Button>
-                          )}
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                ) : (
-                  <p className="text-[11px] text-muted-foreground py-4 text-center">No connected people yet</p>
-                )}
-              </div>
-
-              {/* Sent Requests */}
-              {pendingSent.length > 0 && (
-                <div className="space-y-2">
-                  <h5 className="text-[11px] font-bold tracking-wider text-muted-foreground uppercase flex items-center gap-1">
-                    <Clock className="h-3 w-3" /> Sent Requests ({pendingSent.length})
-                  </h5>
-                  <div className="space-y-1">
-                    {pendingSent.map((req) => (
-                      <div key={req.id} className="flex items-center justify-between p-2 hover:bg-muted/30 rounded-lg animate-fade-in">
-                        <div className="flex items-center space-x-2.5 min-w-0">
-                          <Avatar className="h-8 w-8">
-                            <AvatarImage src={req.receiver.avatarUrl} />
-                            <AvatarFallback className="bg-muted text-muted-foreground text-xs">{req.receiver.name.charAt(0)}</AvatarFallback>
-                          </Avatar>
-                          <span className="text-xs font-semibold truncate">{req.receiver.name}</span>
-                        </div>
-                        <Button 
-                          variant="ghost" 
-                          size="sm" 
-                          className="h-7 text-xs px-2.5 text-red-500 hover:bg-red-50 dark:hover:bg-red-950/20 cursor-pointer"
-                          onClick={() => handleRemoveConnection(req.id)}
-                        >
-                          Cancel
-                        </Button>
-                      </div>
-                    ))}
-                  </div>
-                </div>
+                      <span className="text-sm font-semibold truncate text-foreground">{friend.name}</span>
+                    </div>
+                  </button>
+                ))
+              ) : (
+                <p className="text-[11px] text-muted-foreground py-4 text-center">No connections found</p>
               )}
             </div>
           </ScrollArea>
