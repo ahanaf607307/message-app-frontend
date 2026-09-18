@@ -1529,23 +1529,41 @@ export default function DashboardPortal({
                         ) : (
                           <>
                             {isViewingUserFriend ? (
-                              <Button 
-                                size="sm" 
-                                className="h-9 px-4 text-xs bg-[#0b4d3a] hover:bg-[#08362b] dark:bg-primary text-white font-bold rounded-xl cursor-pointer shadow-3xs"
-                                onClick={async () => {
-                                  try {
-                                    const res = await api.post('/conversations/create', {
-                                      participantIds: [activeProfileUser.id],
-                                      isGroupChat: false
-                                    });
-                                    onSelectConversation(res.data.data);
-                                  } catch (e) {
-                                    toast.error('Failed to launch chat window');
-                                  }
-                                }}
-                              >
-                                <MessageSquare className="h-3.5 w-3.5 mr-1.5" /> Message
-                              </Button>
+                              <div className="flex gap-2">
+                                <Button 
+                                  size="sm" 
+                                  className="h-9 px-4 text-xs bg-[#0b4d3a] hover:bg-[#08362b] dark:bg-primary text-white font-bold rounded-xl cursor-pointer shadow-3xs"
+                                  onClick={async () => {
+                                    try {
+                                      const res = await api.post('/conversations/create', {
+                                        participantIds: [activeProfileUser.id],
+                                        isGroupChat: false
+                                      });
+                                      onSelectConversation(res.data.data);
+                                    } catch (e) {
+                                      toast.error('Failed to launch chat window');
+                                    }
+                                  }}
+                                >
+                                  <MessageSquare className="h-3.5 w-3.5 mr-1.5" /> Message
+                                </Button>
+                                <Button 
+                                  size="sm" 
+                                  variant="outline"
+                                  className="h-9 px-4 text-xs border-red-500/30 text-red-500 hover:bg-red-50 dark:hover:bg-red-950/20 font-bold rounded-xl cursor-pointer shadow-3xs transition-colors"
+                                  onClick={() => {
+                                    const friendObj = friends.find(f => f.id === activeProfileUser.id);
+                                    if (friendObj?.connectionId) {
+                                      handleRemoveConnection(friendObj.connectionId);
+                                      setIsViewingUserFriend(false);
+                                    } else {
+                                      toast.error('Could not find connection details to remove');
+                                    }
+                                  }}
+                                >
+                                  Remove Connection
+                                </Button>
+                              </div>
                             ) : (
                               <Button 
                                 size="sm" 
