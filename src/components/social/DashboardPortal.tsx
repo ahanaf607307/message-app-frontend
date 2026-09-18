@@ -688,20 +688,22 @@ export default function DashboardPortal({
           </Button>
 
           <DropdownMenu modal={false}>
-            <DropdownMenuTrigger asChild>
-              <Button 
-                variant="ghost" 
-                size="icon" 
-                className="h-10 w-10 rounded-full bg-[#f3eae0] dark:bg-muted hover:bg-[#ebdccb] dark:hover:bg-muted/80 text-[#0b4d3a] dark:text-foreground cursor-pointer relative outline-none"
-                title="Notifications"
-              >
-                <Bell className="h-4 w-4" />
-                {pendingIncoming.length > 0 && (
-                  <span className="absolute -top-0.5 -right-0.5 h-4 w-4 rounded-full bg-orange-600 text-white text-[9px] font-black flex items-center justify-center shadow-sm">
-                    {pendingIncoming.length}
-                  </span>
-                )}
-              </Button>
+            <DropdownMenuTrigger
+              render={
+                <Button 
+                  variant="ghost" 
+                  size="icon" 
+                  className="h-10 w-10 rounded-full bg-[#f3eae0] dark:bg-muted hover:bg-[#ebdccb] dark:hover:bg-muted/80 text-[#0b4d3a] dark:text-foreground cursor-pointer relative outline-none"
+                  title="Notifications"
+                />
+              }
+            >
+              <Bell className="h-4 w-4" />
+              {pendingIncoming.length > 0 && (
+                <span className="absolute -top-0.5 -right-0.5 h-4 w-4 rounded-full bg-orange-600 text-white text-[9px] font-black flex items-center justify-center shadow-sm">
+                  {pendingIncoming.length}
+                </span>
+              )}
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-64 rounded-xl border border-border bg-card shadow-lg p-2 text-foreground z-50">
               <div className="flex items-center justify-between px-2 pt-1 pb-2 border-b border-border/60">
