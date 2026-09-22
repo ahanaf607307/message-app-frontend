@@ -561,7 +561,6 @@ export default function ChatWindow({
               </div>
               <div className="space-y-1">
                 <p><strong>Email:</strong> {otherParticipant.user.email}</p>
-                <p><strong>Role:</strong> {otherParticipant.user.role}</p>
               </div>
             </div>
           )}
